@@ -1,5 +1,5 @@
 // Starta servern
-s.boot; // en rad kod körs med <Shift> och <Enter>
+s.boot; // en rad ko körs med <Shift> och <Enter>
 // Stop server
 s.quit;
 // Start oscilloscope
@@ -13,6 +13,7 @@ s.scope;
 
 // För start-ljudet
 SynthDef(\samplePlayerStart, { arg bufnum = 0;
+	var rateMod = 1.0;
     var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
@@ -26,6 +27,7 @@ SynthDef(\samplePlayerStart, { arg bufnum = 0;
 	//skickas sedan till ljudutgången med Out.ar.
 	var output = sound;
 
+
 	Out.ar(0, output);
 }).add;
 
@@ -37,15 +39,16 @@ SynthDef(\samplePlayerStart, { arg bufnum = 0;
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 // Laddar in sound buffers
-var startSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Start.wav");
+var startSample = Buffer.read(s,"C:/Users/mahon/Desktop/Cappy_spel/TNM113-Procedural-Sound-Design-for-User-Interfaces/Lab1/Ljudfiler/Start.wav"));
+Synth.new(\samplePlayerStart, [\bufnum, startSample]);
+~samplePlayerStart.set(\rateMod, 10);
+
 //var lightSample = Buffer.read(s, lightSoundP);
 //var mediumSample = Buffer.read(s, mediumSoundP);
 //var darkSample = Buffer.read(s, darkSoundP);
 
 // Skapar syntinstancer med hjälp av de olika buffrarna
 // Synth.new(defName, args, target, addAction: 'addToHead')
-Synth.new(\samplePlayerStart, [\bufnum, startSample]);
-~samplePlayerStart.set(\rateMod, 0.2);
 
 //Synth.new(\samplePlayerLight, [\bufnum, lightSample]);
 
