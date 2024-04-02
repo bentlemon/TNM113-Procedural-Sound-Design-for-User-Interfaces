@@ -9,17 +9,21 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\samplePlayer, { arg bufnum = 0;
+// PlayBuf.ar(numChannels, bufnum: 0, rate: 1.0, trigger: 1.0, startPos: 0.0, loop: 0.0, doneAction: 0)
+
+// För start-ljudet
+SynthDef(\samplePlayerStart, { arg bufnum = 0;
     var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
-		rate: BufRateScale.kr(bufnum),
+		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 0,
+		loop: 1,
 		doneAction: 0,
 	);
-
+	//Sampleplaybackoscillatorn stoppas i sound, och sound i sin tur stoppas i output och output
+	//skickas sedan till ljudutgången med Out.ar.
 	var output = sound;
 
 	Out.ar(0, output);
@@ -28,14 +32,24 @@ SynthDef(\samplePlayer, { arg bufnum = 0;
 )
 
 
-
-
 // Klientside skript
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sound.wav");
+// Laddar in sound buffers
+var startSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Start.wav");
+//var lightSample = Buffer.read(s, lightSoundP);
+//var mediumSample = Buffer.read(s, mediumSoundP);
+//var darkSample = Buffer.read(s, darkSoundP);
 
-Synth.new(\samplePlayer, [\bufnum, soundSample]);
+// Skapar syntinstancer med hjälp av de olika buffrarna
+// Synth.new(defName, args, target, addAction: 'addToHead')
+Synth.new(\samplePlayerStart, [\bufnum, startSample]);
+~samplePlayerStart.set(\rateMod, 0.2);
 
+//Synth.new(\samplePlayerLight, [\bufnum, lightSample]);
+
+//Synth.new(\samplePlayerMedium, [\bufnum, mediumSample]);
+
+//Synth.new(\samplePlayerDark, [\bufnum, darkSample]);
 )
