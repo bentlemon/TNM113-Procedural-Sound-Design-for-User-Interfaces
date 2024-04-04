@@ -17,7 +17,7 @@ SynthDef(\samplePlayer, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 1,
+		loop: 0,
 		doneAction: 0,
 	);
 
@@ -29,7 +29,7 @@ SynthDef(\samplePlayer, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq
 	// Byt variabel i hl för ändring av output
    var output = outputRLPF;
 
-	Out.ar(0, output);
+	Out.ar(0, [output, output]);
 }).add;
 
 // HÖGPASSFILTER
@@ -40,7 +40,7 @@ SynthDef(\samplePlayer1, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 1,
+		loop: 0,
 		doneAction: 0,
 	);
 
@@ -49,7 +49,7 @@ SynthDef(\samplePlayer1, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 	// Byt variabel i hl för ändring av output
    var output = outputHPF;
 
-	Out.ar(0, output);
+	Out.ar(0, [output, output]);
 }).add;
 
 // BANDPASSFILTER
@@ -60,7 +60,7 @@ SynthDef(\samplePlayer2, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 1,
+		loop: 0,
 		doneAction: 0,
 	);
 
@@ -72,7 +72,7 @@ SynthDef(\samplePlayer2, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 	// Byt variabel i hl för ändring av output
    var output = outputBPF;
 
-	Out.ar(0, output);
+	Out.ar(0, [output, output]);
 }).add;
 
 // ENVELOPE MED ASDR
@@ -83,7 +83,7 @@ SynthDef(\samplePlayer3, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 1,
+		loop: 0,
 		doneAction: 0,
 	);
 
@@ -94,7 +94,7 @@ SynthDef(\samplePlayer3, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 	// Byt variabel i hl för ändring av output
    var output = sound * envelope;
 
-	Out.ar(0, output);
+	Out.ar(0, [output, output]);
 }).add;
 
 )
@@ -110,7 +110,7 @@ var soundSample2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mellan
 var soundSample3 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Ljus.wav");
 var soundSample4 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mörk_3.wav");
 
-s.record("Desktop/Github_resp/TNM113-Procedural-Sound-Design-for-User-Interfaces/Lab1");
+s.record("/ljud1.wav"); // ???????
 
 
 fork({
@@ -120,25 +120,25 @@ fork({
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	1.wait; // Väntar 1 sekund
+	10.wait; // Väntar 1 sekund
 	~samplePlayer = Synth.new(\samplePlayer1, [\bufnum, soundSample1]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	1.wait;
+	10.wait;
 	~samplePlayer = Synth.new(\samplePlayer2, [\bufnum, soundSample1]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	1.wait;
+	10.wait;
 	~samplePlayer = Synth.new(\samplePlayer3, [\bufnum, soundSample1]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	1.wait;
+	5.wait;
 
 });
 s.stopRecording;
