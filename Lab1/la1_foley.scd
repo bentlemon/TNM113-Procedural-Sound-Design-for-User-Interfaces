@@ -1,5 +1,5 @@
 // Starta servern
-s.boot; // en rad ko körs med <Shift> och <Enter>
+s.boot; // en rad kod körs med <Shift> och <Enter>
 // Stop server
 s.quit;
 // Start oscilloscope
@@ -9,11 +9,7 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-// PlayBuf.ar(numChannels, bufnum: 0, rate: 1.0, trigger: 1.0, startPos: 0.0, loop: 0.0, doneAction: 0)
-
-// För start-ljudet
-SynthDef(\samplePlayerStart, { arg bufnum = 0;
-	var rateMod = 1.0;
+SynthDef(\samplePlayer, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
@@ -23,10 +19,19 @@ SynthDef(\samplePlayerStart, { arg bufnum = 0;
 		loop: 1,
 		doneAction: 0,
 	);
-	//Sampleplaybackoscillatorn stoppas i sound, och sound i sin tur stoppas i output och output
-	//skickas sedan till ljudutgången med Out.ar.
-	var output = sound;
 
+	// Lågpassfilter
+	//var output = LPF.ar(in: sound, freq: cutoffFreq, mul: 1.0, add: 0.0) * volumeMod;
+
+	// Högpassfilter
+	//var output = HPF.ar(in: sound, freq: cutoffFreq, mul: 1.0, add: 0.0) * volumeMod;
+
+	// Resonans filter
+	//var output = RLPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
+
+	var output = BPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
+
+   //var output = sound * volumeMod;
 
 	Out.ar(0, output);
 }).add;
@@ -34,25 +39,16 @@ SynthDef(\samplePlayerStart, { arg bufnum = 0;
 )
 
 
+
 // Klientside skript
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-// Laddar in sound buffers
-var startSample = Buffer.read(s,"C:/Users/mahon/Desktop/Cappy_spel/TNM113-Procedural-Sound-Design-for-User-Interfaces/Lab1/Ljudfiler/Start.wav"));
-Synth.new(\samplePlayerStart, [\bufnum, startSample]);
-~samplePlayerStart.set(\rateMod, 10);
+var soundSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sound.wav");
 
-//var lightSample = Buffer.read(s, lightSoundP);
-//var mediumSample = Buffer.read(s, mediumSoundP);
-//var darkSample = Buffer.read(s, darkSoundP);
-
-// Skapar syntinstancer med hjälp av de olika buffrarna
-// Synth.new(defName, args, target, addAction: 'addToHead')
-
-//Synth.new(\samplePlayerLight, [\bufnum, lightSample]);
-
-//Synth.new(\samplePlayerMedium, [\bufnum, mediumSample]);
-
-//Synth.new(\samplePlayerDark, [\bufnum, darkSample]);
+~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample]);
+~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
+~samplePlayer.set(\volumeMod, 1.5);
+~samplePlayer.set(\cutoffFreq, 900);
+~samplePlayer.set(\rq_value, 0.8);
 )
