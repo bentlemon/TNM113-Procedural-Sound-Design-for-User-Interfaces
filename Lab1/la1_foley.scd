@@ -9,10 +9,10 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-// RESONANSFILTER
-SynthDef(\samplePlayer, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+// ------------------- STARTLJUD ----------------- MOLLY
+SynthDef(\sampleStart, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
-		numChannels: 2,
+		numChannels: 1,
 		bufnum: bufnum,
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
@@ -32,10 +32,10 @@ SynthDef(\samplePlayer, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq
 	Out.ar(0, [output, output]);
 }).add;
 
-// HÖGPASSFILTER
-SynthDef(\samplePlayer1, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+// ------------------- MELLANLJUD -----------------
+SynthDef(\sampleMellan, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
-		numChannels: 2,
+		numChannels: 1,
 		bufnum: bufnum,
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
@@ -52,10 +52,10 @@ SynthDef(\samplePlayer1, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 	Out.ar(0, [output, output]);
 }).add;
 
-// BANDPASSFILTER
-SynthDef(\samplePlayer2, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+// ------------------- LJUSTLJUD -----------------
+SynthDef(\sampleLjus, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
-		numChannels: 2,
+		numChannels: 1,
 		bufnum: bufnum,
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
@@ -75,10 +75,10 @@ SynthDef(\samplePlayer2, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 	Out.ar(0, [output, output]);
 }).add;
 
-// ENVELOPE MED ASDR
-SynthDef(\samplePlayer3, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+// ------------------- MÖRKTLJUD ----------------- MOLLY
+SynthDef(\sampleMork, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
-		numChannels: 2,
+		numChannels: 1,
 		bufnum: bufnum,
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
@@ -105,35 +105,38 @@ SynthDef(\samplePlayer3, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFre
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-var soundSample1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Start.wav");
-var soundSample2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mellan_2.wav");
-var soundSample3 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Ljus.wav");
-var soundSample4 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mörk_3.wav");
+var soundStart = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Start.wav");
+var soundMellan = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mellan_2.wav");
+var soundLjus = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Ljus.wav");
+var soundMork= Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mörk_3.wav");
 
-s.record("/ljud1.wav"); // ???????
-
+Server.default.record;
 
 fork({
-	//
-	~samplePlayer = Synth.new(\samplePlayer, [\bufnum, soundSample1]);
+	1.wait;
+	// Startljud - Molly
+	~samplePlayer = Synth.new(\sampleStart, [\bufnum, soundStart]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	10.wait; // Väntar 1 sekund
-	~samplePlayer = Synth.new(\samplePlayer1, [\bufnum, soundSample1]);
+	10.wait; // Väntar 10 sekund
+	// Mellan
+	/*~samplePlayer = Synth.new(\sampleMellan, [\bufnum, soundMellan]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	10.wait;
-	~samplePlayer = Synth.new(\samplePlayer2, [\bufnum, soundSample1]);
+	10.wait; */
+	// Ljus
+	/*~samplePlayer = Synth.new(\sampleLjus, [\bufnum, soundLjus]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	10.wait;
-	~samplePlayer = Synth.new(\samplePlayer3, [\bufnum, soundSample1]);
+	10.wait; */
+	// Mörkt - Molly
+	~samplePlayer = Synth.new(\sampleMork, [\bufnum, soundMork]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
@@ -141,5 +144,4 @@ fork({
 	5.wait;
 
 });
-s.stopRecording;
 )
