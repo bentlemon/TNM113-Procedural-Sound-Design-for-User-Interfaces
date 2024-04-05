@@ -26,6 +26,7 @@ SynthDef(\sampleStart, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq 
 	// Resonans filter - självsvägning vid brytningsfrekvensen
 	var outputRLPF = RLPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
 
+
 	// Byt variabel i hl för ändring av output
    var output = outputRLPF;
 
@@ -40,14 +41,15 @@ SynthDef(\sampleMellan, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq
 		rate: BufRateScale.kr(bufnum) * rateMod,
 		trigger: 1,
 		startPos: 0,
-		loop: 0,
+		loop: 1,
 		doneAction: 0,
 	);
 
-	var outputHPF = HPF.ar(in: sound, freq: cutoffFreq, mul: 1.0, add: 0.0) * volumeMod;
+	  var outputBPF = BPF.ar(in: sound, freq: cutoffFreq, mul: 1.0, add: 0.0) * volumeMod;
+	  var outputRLPF = RLPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
 
 	// Byt variabel i hl för ändring av output
-   var output = outputHPF;
+   var output = outputBPF * outputRLPF;
 
 	Out.ar(0, [output, output]);
 }).add;
@@ -68,9 +70,10 @@ SynthDef(\sampleLjus, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq =
 
 	// Bandpassfilter - 2dr gradens butterworthfilter
 	var outputBPF = BPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
+	var outputRLPF = RLPF.ar(in: sound, freq: cutoffFreq, rq: rq_value, mul: 1.0, add: 0.0) * volumeMod;
 
 	// Byt variabel i hl för ändring av output
-   var output = outputBPF;
+   var output = outputBPF * outputRLPF;
 
 	Out.ar(0, [output, output]);
 }).add;
@@ -110,38 +113,39 @@ var soundMellan = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mellan_
 var soundLjus = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Ljus.wav");
 var soundMork= Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mörk_3.wav");
 
-Server.default.record;
+//Server.default.record;
 
 fork({
-	1.wait;
+	0.1.wait;
 	// Startljud - Molly
-	~samplePlayer = Synth.new(\sampleStart, [\bufnum, soundStart]);
+/*	~samplePlayer = Synth.new(\sampleStart, [\bufnum, soundStart]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	10.wait; // Väntar 10 sekund
+	10.wait;*/ // Väntar 10 sekund
 	// Mellan
-	/*~samplePlayer = Synth.new(\sampleMellan, [\bufnum, soundMellan]);
-	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
-	~samplePlayer.set(\volumeMod, 1.5);
-	~samplePlayer.set(\cutoffFreq, 900);
+	~samplePlayer = Synth.new(\sampleMellan, [\bufnum, soundMellan]);
+	~samplePlayer.set(\rateMod, 1.1);//.lag(0.05); // oklart
+	~samplePlayer.set(\volumeMod, 18);
+	~samplePlayer.set(\cutoffFreq, 600);
 	~samplePlayer.set(\rq_value, 0.8);
-	10.wait; */
+	3.wait;
 	// Ljus
-	/*~samplePlayer = Synth.new(\sampleLjus, [\bufnum, soundLjus]);
+	~samplePlayer = Synth.new(\sampleLjus, [\bufnum, soundLjus]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
-	~samplePlayer.set(\volumeMod, 1.5);
+	~samplePlayer.set(\volumeMod, 15);
 	~samplePlayer.set(\cutoffFreq, 900);
-	~samplePlayer.set(\rq_value, 0.8);
-	10.wait; */
+	~samplePlayer.set(\rq_value, 2);
+	10.wait;
 	// Mörkt - Molly
+	/*
 	~samplePlayer = Synth.new(\sampleMork, [\bufnum, soundMork]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
 	~samplePlayer.set(\rq_value, 0.8);
-	5.wait;
+	5.wait;*/
 
 });
 )
