@@ -9,8 +9,24 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
+// ------------------- OG INSPELNINGSLJUD ----------------- MOLLY
+SynthDef(\sampleMorkOG, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+    var sound = PlayBuf.ar(
+		numChannels: 1,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum) * rateMod,
+		trigger: 1,
+		startPos: 0,
+		loop: 0,
+		doneAction: 0,
+	);
+	var output = sound * 0.4;
+
+	Out.ar(0, [output, output]);
+}).add;
+
 // ------------------- STARTLJUD ----------------- MOLLY
-SynthDef(\sampleStart, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
+/*SynthDef(\sampleMork, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq = 440, rq_value = 1.0;
     var sound = PlayBuf.ar(
 		numChannels: 1,
 		bufnum: bufnum,
@@ -27,10 +43,11 @@ SynthDef(\sampleStart, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq 
 
 
 	// Byt variabel i hl för ändring av output
-	var output =  sound - (outputRLPF * envelope);
+	var output = outputRLPF * envelope;
 
 	Out.ar(0, [output, output]);
 }).add;
+*/
 
 /*
 // ------------------- MELLANLJUD -----------------
@@ -91,12 +108,13 @@ SynthDef(\sampleMork, { arg bufnum = 0, rateMod = 1, volumeMod = 1, cutoffFreq =
 		doneAction: 0,
 	);
 
-	// Envelope med ADSR - VARNING! Öron kan dö vid användning av envelope2
-	var envelope = EnvGen.kr(Env.perc(attackTime: 0.1, releaseTime: 0.5, level: 1.0, curve: -4.0));
-	var envelope2 = EnvGen.kr(Env.perc(attackTime: 0.01, releaseTime: 0.1, level: 1.0, curve: -4.0).range(100,10000));
+	// Envelope with ADSR
+	var envelope = EnvGen.kr(Env.perc(attackTime: 0.001, releaseTime: 10.0, level: 1.0, curve: -5.0));
 
-	// Byt variabel i hl för ändring av output
-   var output = sound * envelope;
+	// Lowpass filter
+	var filteredSound = LPF.ar(sound, cutoffFreq);
+
+	var output = (sound * envelope * volumeMod) + (filteredSound * 2.0);
 
 	Out.ar(0, [output, output]);
 }).add;
@@ -114,17 +132,19 @@ var soundMellan = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mellan_
 var soundLjus = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Ljus.wav");
 var soundMork= Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/Mörk_3.wav");
 
-//Server.default.record;
+Server.default.record;
 
 fork({
-	1.wait;
-	// Startljud - Molly
-	~samplePlayer = Synth.new(\sampleStart, [\bufnum, soundStart]);
-	~samplePlayer.set(\rateMod, 1); // oklart
+	1.wait; // Annars kommer UGen buff att klaga
+	~samplePlayer = Synth.new(\sampleMorkOG, [\bufnum, soundMork]);
+	//10.wait;
+	// Startljud - Molly - OK
+	/*~samplePlayer = Synth.new(\sampleStart, [\bufnum, soundStart]);
+	~samplePlayer.set(\rateMod, 1.0);
 	~samplePlayer.set(\volumeMod, 2.5);
-	~samplePlayer.set(\cutoffFreq, 350);
-	~samplePlayer.set(\rq_value, 0.7);
-	10.wait; // Väntar 10 sekund
+	~samplePlayer.set(\cutoffFreq, 440);
+	~samplePlayer.set(\rq_value, 0.7); */
+	//10.wait; // Väntar 10 sekund
 	// Mellan
 	/*~samplePlayer = Synth.new(\sampleMellan, [\bufnum, soundMellan]);
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
@@ -137,15 +157,14 @@ fork({
 	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
 	~samplePlayer.set(\volumeMod, 1.5);
 	~samplePlayer.set(\cutoffFreq, 900);
-	~samplePlayer.set(\rq_value, 0.8);
-	10.wait; */
-	// Mörkt - Molly
-	/*~samplePlayer = Synth.new(\sampleMork, [\bufnum, soundMork]);
-	~samplePlayer.set(\rateMod, 1);//.lag(0.05); // oklart
-	~samplePlayer.set(\volumeMod, 1.5);
-	~samplePlayer.set(\cutoffFreq, 900);
-	~samplePlayer.set(\rq_value, 0.8);
+	~samplePlayer.set(\rq_value, 0.8);*/
 	5.wait;
-	*/
+	// Mörkt - Molly
+	~samplePlayer = Synth.new(\sampleMork, [\bufnum, soundMork]);
+	~samplePlayer.set(\rateMod, 0.3);
+	~samplePlayer.set(\volumeMod, 1.0);
+	~samplePlayer.set(\cutoffFreq, 200);
+	~samplePlayer.set(\rq_value, 0.5);
+	1.wait;
 });
 )
