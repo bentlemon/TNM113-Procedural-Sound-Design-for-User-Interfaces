@@ -40,7 +40,7 @@ SynthDef(\snareDrum, { arg t_trig = 1;
 	noise = WhiteNoise.ar(0.15); // Ljudnivå 0.25
 	noise = HPF.ar(noise, 750) * EnvGen.ar(Env.perc(0, 0.12, 1, -4), t_trig);
 
-	output = (body + hit + noise) * 0.2;
+	output = (body + hit + noise) * 0.15;
 
 	Out.ar(0, {output}!2) ;
 
@@ -89,7 +89,7 @@ SynthDef(\highTom, { arg t_trig = 1;
 	body = SinOsc.ar(75 * pitchEnvelope);
 	body = body * EnvGen.ar(Env.perc(0, 0.6, 1, -4), t_trig);
 
-	output = body* 0.15;
+	output = body* 0.1;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -103,7 +103,7 @@ SynthDef(\lowTom, { arg t_trig = 1;
 	body = SinOsc.ar(50 * pitchEnvelope);
 	body = body * EnvGen.ar(Env.perc(0, 0.7, 1, -4), t_trig);
 
-	output = body* 0.15;
+	output = body* 0.1;
 
 	Out.ar(0, {output}!2);
 
@@ -117,7 +117,7 @@ SynthDef(\woodBlock, { arg t_trig = 1;
 
 	body = SinOsc.ar(480) * EnvGen.ar(Env.perc(0, 0.12, 1, -8), t_trig);
 
-	output = body* 0.09;
+	output = body* 0.07;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -131,7 +131,7 @@ SynthDef(\cowBell, { arg t_trig = 1;
 	body = LFPulse.ar(freq:540, width:0.4) + LFPulse.ar(freq:800);
 	body = body * EnvGen.ar(Env.perc(0, 0.5, 1, -4), t_trig);
 
-	output = body * 0.015;
+	output = body * 0.0125; // Niklas hade * 0,04 men sänkte mer
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -148,7 +148,7 @@ SynthDef(\crash, { arg t_trig = 1;
 
 	output = noise + tones;
 
-	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4)) * 0.15;
+	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4)) * 0.1;
 
 	Out.ar(0, {output}!2);
 

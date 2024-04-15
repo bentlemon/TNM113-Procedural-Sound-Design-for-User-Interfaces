@@ -1,6 +1,8 @@
 (
 // Set tempo
 ~tempoInBPM = 120;
+ServerMeter.new(s, 0, 2);
+
 
 // Set the drum sequence
 ~woodBlockDictionary = Dictionary();
