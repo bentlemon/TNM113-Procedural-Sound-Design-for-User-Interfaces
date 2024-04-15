@@ -16,7 +16,9 @@ SynthDef(\bassDrum, { arg t_trig = 1;
 	body = SinOsc.ar(75);
 	body = body * EnvGen.ar(Env.perc(0, 0.1, 1, -4), t_trig);
 
-	output = body;
+	hit = LFSaw.ar(220, mul:0.7) * EnvGen.ar(Env.perc(0, 0.05, 1, -4), t_trig);
+
+	output = body + hit;
 
 	Out.ar(0, {output}!2);
 }).play;
