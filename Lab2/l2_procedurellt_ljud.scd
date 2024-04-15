@@ -10,6 +10,7 @@ s.scope;
 
 // Bass drum
 (
+var level = 0.2;
 SynthDef(\bassDrum, { arg t_trig = 1;
 	var body, hit, output;
 
@@ -20,14 +21,14 @@ SynthDef(\bassDrum, { arg t_trig = 1;
 
 	output = (body + hit)*0.5;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 }).play;
 
-)
+
 
 
 // Snare drum
-(
+
 SynthDef(\snareDrum, { arg t_trig = 1;
 	var body, hit, output, noise;
 
@@ -42,13 +43,13 @@ SynthDef(\snareDrum, { arg t_trig = 1;
 
 	output = body + hit + noise;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 
 }).play;
-)
+
 
 // ClHiHat
-(
+
 SynthDef(\clHiHat, { arg t_trig = 1;
 	var body, hit, output, noise;
 
@@ -57,13 +58,13 @@ SynthDef(\clHiHat, { arg t_trig = 1;
 
 	output = noise * EnvGen.ar(Env.perc(0.005, 0.025, 1, -1));
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 
 }).play;
-)
+
 
 // OpHiHat
-(
+
 SynthDef(\opHiHat, { arg t_trig = 1;
 	var tones, noise, output;
 
@@ -75,12 +76,12 @@ SynthDef(\opHiHat, { arg t_trig = 1;
 
 	output = noise + (tones / 2);
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 }).play;
-)
+
 
 // High tom
-(
+
 SynthDef(\highTom, { arg t_trig = 1;
 	var body, pitchEnvelope, output;
 
@@ -91,12 +92,12 @@ SynthDef(\highTom, { arg t_trig = 1;
 
 	output = body;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 }).play;
-)
+
 
 // Low tom
-(
+
 SynthDef(\lowTom, { arg t_trig = 1;
 	var body, pitchEnvelope, output;
 
@@ -107,13 +108,13 @@ SynthDef(\lowTom, { arg t_trig = 1;
 
 	output = body;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 
 }).play;
 )
 
 // Woodblock
-(
+
 SynthDef(\woodBlock, { arg t_trig = 1;
 	var body, output;
 
@@ -121,12 +122,12 @@ SynthDef(\woodBlock, { arg t_trig = 1;
 
 	output = body;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 }).play;
-)
+
 
 // Cowbell
-(
+
 SynthDef(\cowBell, { arg t_trig = 1;
 	var body, output;
 
@@ -135,12 +136,12 @@ SynthDef(\cowBell, { arg t_trig = 1;
 
 	output = body * 0.04;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 }).play;
-)
+
 
 // Crash
-(
+
 SynthDef(\crash, { arg t_trig = 1;
 	var tones, noise, output;
 
@@ -152,7 +153,7 @@ SynthDef(\crash, { arg t_trig = 1;
 
 	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4));
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output*level}!2);
 
 }).play;
 )
