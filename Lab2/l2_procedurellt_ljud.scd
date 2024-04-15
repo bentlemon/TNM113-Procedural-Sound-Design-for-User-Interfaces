@@ -18,7 +18,7 @@ SynthDef(\bassDrum, { arg t_trig = 1;
 
 	hit = LFSaw.ar(120, mul:0.2) * EnvGen.ar(Env.perc(0, 0.01, 1, -4), t_trig);
 
-	output = (body + hit)*0.5;
+	output = (body + hit)*0.1;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -40,9 +40,9 @@ SynthDef(\snareDrum, { arg t_trig = 1;
 	noise = WhiteNoise.ar(0.15); // Ljudnivå 0.25
 	noise = HPF.ar(noise, 750) * EnvGen.ar(Env.perc(0, 0.12, 1, -4), t_trig);
 
-	output = body + hit + noise;
+	output = (body + hit + noise) * 0.2;
 
-	Out.ar(0, {output}!2);
+	Out.ar(0, {output}!2) ;
 
 }).play;
 )
@@ -55,7 +55,7 @@ SynthDef(\clHiHat, { arg t_trig = 1;
 	noise = WhiteNoise.ar(0.25); // Ljudnivå 0.25
 	noise = HPF.ar(noise, 1500);
 
-	output = noise * EnvGen.ar(Env.perc(0.005, 0.025, 1, -1));
+	output = noise * EnvGen.ar(Env.perc(0.005, 0.025, 1, -1)) * 0.2;
 
 	Out.ar(0, {output}!2);
 
@@ -73,7 +73,7 @@ SynthDef(\opHiHat, { arg t_trig = 1;
 	noise = WhiteNoise.ar(0.1); // Ljudnivå 0.25
 	noise = HPF.ar(noise, 1000)* EnvGen.ar(Env.perc(0.005, 0.7, 1, -1));
 
-	output = noise + (tones / 2);
+	output = (noise + (tones / 2))*0.2;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -89,7 +89,7 @@ SynthDef(\highTom, { arg t_trig = 1;
 	body = SinOsc.ar(75 * pitchEnvelope);
 	body = body * EnvGen.ar(Env.perc(0, 0.6, 1, -4), t_trig);
 
-	output = body;
+	output = body* 0.15;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -99,13 +99,11 @@ SynthDef(\highTom, { arg t_trig = 1;
 (
 SynthDef(\lowTom, { arg t_trig = 1;
 	var body, pitchEnvelope, output;
-
-
 	pitchEnvelope = EnvGen.ar(Env.perc(0, 0.1, 1, -4), t_trig).range(1, 4);
 	body = SinOsc.ar(50 * pitchEnvelope);
 	body = body * EnvGen.ar(Env.perc(0, 0.7, 1, -4), t_trig);
 
-	output = body;
+	output = body* 0.15;
 
 	Out.ar(0, {output}!2);
 
@@ -119,7 +117,7 @@ SynthDef(\woodBlock, { arg t_trig = 1;
 
 	body = SinOsc.ar(480) * EnvGen.ar(Env.perc(0, 0.12, 1, -8), t_trig);
 
-	output = body;
+	output = body* 0.09;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -133,7 +131,7 @@ SynthDef(\cowBell, { arg t_trig = 1;
 	body = LFPulse.ar(freq:540, width:0.4) + LFPulse.ar(freq:800);
 	body = body * EnvGen.ar(Env.perc(0, 0.5, 1, -4), t_trig);
 
-	output = body * 0.04;
+	output = body * 0.015;
 
 	Out.ar(0, {output}!2);
 }).play;
@@ -150,7 +148,7 @@ SynthDef(\crash, { arg t_trig = 1;
 
 	output = noise + tones;
 
-	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4));
+	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4)) * 0.15;
 
 	Out.ar(0, {output}!2);
 
