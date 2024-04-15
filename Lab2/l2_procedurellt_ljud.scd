@@ -141,7 +141,18 @@ SynthDef(\cowBell, { arg t_trig = 1;
 
 // Crash
 (
-SynthDef(\crash, { arg t_trig;
+SynthDef(\crash, { arg t_trig = 1;
+	var tones, noise, output;
+
+	tones = (LFPulse.ar(2000, width:0.5) + LFPulse.ar(1150, width:0.5) + LFPulse.ar(820, width:0.5) + LFPulse.ar(465, width:0.5)) / 4;
+
+	noise = WhiteNoise.ar(0.25);
+
+	output = noise + tones;
+
+	output = RHPF.ar(output, 5000)*EnvGen.ar(Env.perc(0.005, 0.5, 1, -4));
+
+	Out.ar(0, {output}!2);
 
 }).play;
 )
