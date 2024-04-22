@@ -9,10 +9,17 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\distanceSonification, { arg freq = 220, level = 0;
-	var output = LFTri.ar(freq) * level.lag(1);
 
-	Out.ar(0, {output}!2);
+// Startsynten
+SynthDef(\distanceSonification, { arg freq = 15, level = 0;
+    var clock, pdiv, div = [3, 4], output;
+
+    clock = Impulse.ar(freq);
+    pdiv = PulseDivider.ar(clock, div:div, start: div-1);
+
+	output = SinOsc.ar([500, 900]) * Env.perc(0.002, 0.1).ar(gate: pdiv) * 0.1 * level.lag(1);
+
+    Out.ar(0, output.dup);
 }).add;
 
 
@@ -23,6 +30,7 @@ SynthDef(\sendMouse, {
 
 )
 
+// --------- KLIENTSKRIPTET ------------
 (
 // Följande registrerar distanceSonification synthdefinitionen på servern
 ~distanceSynth = Synth.new(\distanceSonification).register;
@@ -30,27 +38,30 @@ SynthDef(\sendMouse, {
 // Denna funktion är den som tar emot avståndet mellan bilen och lampan,
 // och som ska användas för att mappa avståndet till olika mått och sedan
 // justera synthdefinitionen (distanceSonification) på servern.
-~adjustTheSonification = { arg distance; // distance är inputargumentet
-	// Deklarera variabler först
-	var level;
-	// Skriv ut avståndet i Post window
-	("The distance is:" + distance ++ "cm").postln;
-	// Använd case för att ändra/mappa avståndet till olika andra värden
+~adjustTheSonification = { arg distance; // distance is the input argument
+    var freq, level;
+
+    // Print the distance in the Post window
+    ("The distance is: " ++ distance ++ " cm").postln;
 	case
-	// För avstånd kortare än 30cm
+    // Use if-else to map the distance to different values
 	{ distance <= 30 } {
+		freq = 100;
 		level = 1;
 	}
-	// För avstånd kortare än 3 meter
+	// For distances shorter than 3 meters
 	{ distance <= 300 } {
+		freq = 15;
 		level = 1;
 	}
-	// För avstånd längre än 3 meter
+	// For distances longer than 3 meters
 	{ distance > 300 } {
+		freq = 0;
 		level = 0;
 	};
 
-	// Skicka informationen till synthdefinitionen
+    // Send the information to the synth definition
+    ~distanceSynth.set(\freq, freq);
 	~distanceSynth.set(\level, level);
 };
 
