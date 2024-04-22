@@ -22,21 +22,16 @@ SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
     Out.ar(0, output.dup);
 }).add;
 
-SynthDef(\soundSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
+SynthDef(\soundSonification, { arg freq = 15, level = 0, sec = 1, dur = 5, treq_freq = 40;
     var sig, trig, deg, output;
 
-   // var mod = LFNoise2.ar(80);
-   // var sig = SinOsc.ar(mod.linlin(-1,1, MouseX.kr(200, 8000, 1), MouseY.kr(200, 8000, 1))) * 0.1;
 
 	deg = Duty.ar(1/2, 0, Dseq([0, 2, -1, -3], inf));
-	trig = (DegreeToKey.ar(3, deg) + 50).midicps;
+	trig = (DegreeToKey.ar(3, deg) + 40).midicps;
 	trig = trig * { Rand(-0.1, 0.1).midiratio }.dup(4);
 	sig = Saw.ar(trig);
 	sig = Splay.ar(sig);
 	sig = MoogFF.ar(sig, 1500);
-
-	 //var mod = SinOsc.kr(Line.kr(1, 2, 2));
-    //var sig = SinOsc.ar(LinExp.kr(mod, 0,1, 100, 500)) * 0.1
 
 	output = sig * 0.1 * level.lag(sec);
 
@@ -61,7 +56,7 @@ SynthDef(\sendMouse, {
 // och som ska användas för att mappa avståndet till olika mått och sedan
 // justera synthdefinitionen (distanceSonification) på servern.
 ~adjustTheSonification = { arg distance; // distance is the input argument
-    var freq, level, sec, dur;
+    var freq, level, sec, dur, treq_freq;
 
     // Print the distance in the Post window
     ("The distance is: " ++ distance ++ " cm").postln;
@@ -72,6 +67,7 @@ SynthDef(\sendMouse, {
 		level = 1;
 		sec = 0.5;
 		dur = 1;
+		treq_freq = 90;
 	}
 	// For distances shorter than 3 meters
 	{ distance <= 300 } {
@@ -79,6 +75,7 @@ SynthDef(\sendMouse, {
 		level = 0.5;
 		sec = 2;
 		dur = 5;
+		treq_freq = 40;
 	}
 	// For distances longer than 3 meters
 	{ distance > 300 } {
