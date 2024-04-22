@@ -11,13 +11,13 @@ s.scope;
 
 
 // Startsynten
-SynthDef(\distanceSonification, { arg freq = 15, level = 0;
-    var clock, pdiv, div = [3, 4], output;
+SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
+    var clock, pdiv, div = [4, 4], output;
 
     clock = Impulse.ar(freq);
     pdiv = PulseDivider.ar(clock, div:div, start: div-1);
 
-	output = SinOsc.ar([500, 900]) * Env.perc(0.002, 0.1).ar(gate: pdiv) * 0.1 * level.lag(1);
+	output = SinOsc.ar([150, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 * level.lag(sec);
 
     Out.ar(0, output.dup);
 }).add;
@@ -39,7 +39,7 @@ SynthDef(\sendMouse, {
 // och som ska användas för att mappa avståndet till olika mått och sedan
 // justera synthdefinitionen (distanceSonification) på servern.
 ~adjustTheSonification = { arg distance; // distance is the input argument
-    var freq, level;
+    var freq, level, sec, dur;
 
     // Print the distance in the Post window
     ("The distance is: " ++ distance ++ " cm").postln;
@@ -48,21 +48,29 @@ SynthDef(\sendMouse, {
 	{ distance <= 30 } {
 		freq = 100;
 		level = 1;
+		sec = 0.5;
+		dur = 1;
 	}
 	// For distances shorter than 3 meters
 	{ distance <= 300 } {
 		freq = 15;
-		level = 1;
+		level = 0.5;
+		sec = 2;
+		dur = 5;
 	}
 	// For distances longer than 3 meters
 	{ distance > 300 } {
 		freq = 0;
 		level = 0;
+		sec = 1;
+		dur = 1;
 	};
 
     // Send the information to the synth definition
     ~distanceSynth.set(\freq, freq);
 	~distanceSynth.set(\level, level);
+	~distanceSynth.set(\sec, sec);
+	~distanceSynth.set(\dur, dur);
 };
 
 
@@ -72,13 +80,13 @@ SynthDef(\sendMouse, {
 ~windowWidth = Window.screenBounds.right;
 ~windowHeight = Window.screenBounds.bottom;
 ~guiPosX = ((~windowWidth/2) - (1024/2));
-~guiPosY = ((~windowHeight/2) - (768/2));
+~guiPosY = ((~windowHeight/2) - (500/2));
 w = Window.new("SID - parking assistance",
 	Rect.new(
 		~guiPosX,
 		~guiPosY,
 		1024,
-		768))
+		500))
 .front
 .background_(Color.new255(0,0,0,255));
 ~backgroundImage = Image.new(thisProcess.nowExecutingPath.dirname +/+ "road.png");
