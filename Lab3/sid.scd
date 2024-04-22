@@ -28,8 +28,8 @@ SynthDef(\soundSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
    // var mod = LFNoise2.ar(80);
    // var sig = SinOsc.ar(mod.linlin(-1,1, MouseX.kr(200, 8000, 1), MouseY.kr(200, 8000, 1))) * 0.1;
 
-	deg = Duty.ar(1/4, 0, Dseq([0, 2, -1, -3], inf));
-	trig = (DegreeToKey.ar(b, deg) + 50).midicps;
+	deg = Duty.ar(1/2, 0, Dseq([0, 2, -1, -3], inf));
+	trig = (DegreeToKey.ar(3, deg) + 50).midicps;
 	trig = trig * { Rand(-0.1, 0.1).midiratio }.dup(4);
 	sig = Saw.ar(trig);
 	sig = Splay.ar(sig);
