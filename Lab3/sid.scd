@@ -17,22 +17,30 @@ SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
     clock = Impulse.ar(freq);
     pdiv = PulseDivider.ar(clock, div:div, start: div-1);
 
-	output = SinOsc.ar([150, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 * level.lag(sec);
+	output = SinOsc.ar([150, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 *  level.lag(sec);
 
     Out.ar(0, output.dup);
 }).add;
 
-SynthDef(\soundSonification, { arg freq = 220, level = 0;
+SynthDef(\soundSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
+    var sig, trig, deg, output;
 
-	var freque = LFNoise3.kr(8). range(50,100);
-	var sig = SinOsc.ar(freque) * 0.1;
+   // var mod = LFNoise2.ar(80);
+   // var sig = SinOsc.ar(mod.linlin(-1,1, MouseX.kr(200, 8000, 1), MouseY.kr(200, 8000, 1))) * 0.1;
 
-	var output = SinOsc.ar(XLine.kr(50,500,5),0,0.1) * level.lag(1)*0.1;
+	deg = Duty.ar(1/4, 0, Dseq([0, 2, -1, -3], inf));
+	trig = (DegreeToKey.ar(b, deg) + 50).midicps;
+	trig = trig * { Rand(-0.1, 0.1).midiratio }.dup(4);
+	sig = Saw.ar(trig);
+	sig = Splay.ar(sig);
+	sig = MoogFF.ar(sig, 1500);
 
-	output = output + sig * level.lag(1);
+	 //var mod = SinOsc.kr(Line.kr(1, 2, 2));
+    //var sig = SinOsc.ar(LinExp.kr(mod, 0,1, 100, 500)) * 0.1
 
+	output = sig * 0.1 * level.lag(sec);
 
-	Out.ar(0, {output}!2);
+    Out.ar(0, output.dup);
 }).add;
 
 
@@ -58,7 +66,7 @@ SynthDef(\sendMouse, {
     // Print the distance in the Post window
     ("The distance is: " ++ distance ++ " cm").postln;
 	case
-	// Use if-else to map the distance to different values
+    // Use if-else to map the distance to different values
 	{ distance <= 30 } {
 		freq = 100;
 		level = 1;
