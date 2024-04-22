@@ -12,12 +12,12 @@ s.scope;
 
 // Startsynten
 SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
-    var clock, pdiv, div = [4, 4], output;
+    var clock, pdiv, div = [3, 6], output;
 
     clock = Impulse.ar(freq);
     pdiv = PulseDivider.ar(clock, div:div, start: div-1);
 
-	output = SinOsc.ar([150, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 * level.lag(sec);
+	output = SinOsc.ar([110, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 * level.lag(sec);
 
     Out.ar(0, output.dup);
 }).add;
@@ -46,14 +46,14 @@ SynthDef(\sendMouse, {
 	case
     // Use if-else to map the distance to different values
 	{ distance <= 30 } {
-		freq = 100;
+		freq = 110;
 		level = 1;
 		sec = 0.5;
 		dur = 1;
 	}
 	// For distances shorter than 3 meters
 	{ distance <= 300 } {
-		freq = 15;
+		freq = 20;
 		level = 0.5;
 		sec = 2;
 		dur = 5;
@@ -63,7 +63,7 @@ SynthDef(\sendMouse, {
 		freq = 0;
 		level = 0;
 		sec = 1;
-		dur = 1;
+		dur = 0;
 	};
 
     // Send the information to the synth definition
