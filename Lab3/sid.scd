@@ -9,13 +9,17 @@ s.scope;
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\distanceSonification, { arg freq = 220, level = 0;
-	var clock = Impulse.ar(freq);
-	var pdiv = PulseDivider.ar(clock, [4, 4], [2, 2]);
 
-	var output = SinOsc.ar([500, 900]) * Env.perc(0.002, 0.1).ar(gate: pdiv) * 0.1* level.lag(1);
+// Startsynten
+SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
+    var clock, pdiv, div = [4, 4], output;
 
-	Out.ar(0, {output}!2);
+    clock = Impulse.ar(freq);
+    pdiv = PulseDivider.ar(clock, div:div, start: div-1);
+
+	output = SinOsc.ar([150, 900]) * SinOsc.ar(XLine.kr(200, 800, dur), 0, 0.9) * Env.perc(0.002, 0.5).ar(gate: pdiv) * 0.1 * level.lag(sec);
+
+    Out.ar(0, output.dup);
 }).add;
 
 SynthDef(\soundSonification, { arg freq = 220, level = 0;
@@ -39,6 +43,7 @@ SynthDef(\sendMouse, {
 
 )
 
+// --------- KLIENTSKRIPTET ------------
 (
 // Följande registrerar distanceSonification synthdefinitionen på servern
 ~distanceSynth = Synth.new(\distanceSonification).register;
@@ -47,33 +52,39 @@ SynthDef(\sendMouse, {
 // Denna funktion är den som tar emot avståndet mellan bilen och lampan,
 // och som ska användas för att mappa avståndet till olika mått och sedan
 // justera synthdefinitionen (distanceSonification) på servern.
-~adjustTheSonification = { arg distance; // distance är inputargumentet
-	// Deklarera variabler först
-	var level;
-	var freq;
-	// Skriv ut avståndet i Post window
-	("The distance is:" + distance ++ "cm").postln;
-	// Använd case för att ändra/mappa avståndet till olika andra värden
-	case
-	// För avstånd kortare än 30cm
-	{ distance <= 30 } {
-		level = 1;
-		freq = 150;
+~adjustTheSonification = { arg distance; // distance is the input argument
+    var freq, level, sec, dur;
 
-	}
-	// För avstånd kortare än 3 meter
-	{ distance <= 300 } {
+    // Print the distance in the Post window
+    ("The distance is: " ++ distance ++ " cm").postln;
+	case
+	// Use if-else to map the distance to different values
+	{ distance <= 30 } {
+		freq = 100;
 		level = 1;
-		freq = 20;
+		sec = 0.5;
+		dur = 1;
 	}
-	// För avstånd längre än 3 meter
+	// For distances shorter than 3 meters
+	{ distance <= 300 } {
+		freq = 15;
+		level = 0.5;
+		sec = 2;
+		dur = 5;
+	}
+	// For distances longer than 3 meters
 	{ distance > 300 } {
+		freq = 0;
 		level = 0;
+		sec = 1;
+		dur = 1;
 	};
 
-	// Skicka informationen till synthdefinitionen
+    // Send the information to the synth definition
+    ~distanceSynth.set(\freq, freq);
 	~distanceSynth.set(\level, level);
-	~distanceSynth.set(\freq, freq);
+	~distanceSynth.set(\sec, sec);
+	~distanceSynth.set(\dur, dur);
 	~soundSynth.set(\level, level);
 };
 
@@ -84,13 +95,13 @@ SynthDef(\sendMouse, {
 ~windowWidth = Window.screenBounds.right;
 ~windowHeight = Window.screenBounds.bottom;
 ~guiPosX = ((~windowWidth/2) - (1024/2));
-~guiPosY = ((~windowHeight/2) - (768/2));
+~guiPosY = ((~windowHeight/2) - (500/2));
 w = Window.new("SID - parking assistance",
 	Rect.new(
 		~guiPosX,
 		~guiPosY,
 		1024,
-		768))
+		500))
 .front
 .background_(Color.new255(0,0,0,255));
 ~backgroundImage = Image.new(thisProcess.nowExecutingPath.dirname +/+ "road.png");
