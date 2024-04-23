@@ -22,18 +22,19 @@ SynthDef(\distanceSonification, { arg freq = 15, level = 0, sec = 1, dur = 5;
     Out.ar(0, output.dup);
 }).add;
 
-SynthDef(\soundSonification, { arg freq = 15, level = 0, sec = 1, dur = 5, treq_freq = 40;
-    var sig, trig, deg, output;
-
+SynthDef(\soundSonification, { arg level = 0, sec = 1, dur = 5, treq_freq = 40;
+    var sig, freq, deg, output;
 
 	deg = Duty.ar(1/2, 0, Dseq([0, 2, -1, -3], inf));
-	trig = (DegreeToKey.ar(3, deg) + 40).midicps;
-	trig = trig * { Rand(-0.1, 0.1).midiratio }.dup(4);
-	sig = Saw.ar(trig);
+	freq = (DegreeToKey.ar(3, deg) + 40).midicps;
+	freq = freq * { Rand(-0.1, 0.1).midiratio }.dup(4);
+	sig = Saw.ar(freq);
 	sig = Splay.ar(sig);
+
 	sig = MoogFF.ar(sig, 1500);
 
 	output = sig * 0.1 * level.lag(sec);
+
 
     Out.ar(0, output.dup);
 }).add;
