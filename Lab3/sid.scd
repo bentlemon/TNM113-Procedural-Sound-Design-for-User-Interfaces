@@ -27,7 +27,7 @@ SynthDef(\soundSonification, { arg level = 0, sec = 1, dur = 5, treq_freq = 40;
 
 	deg = Duty.ar(1/2, 0, Dseq([0, 2, -1, -3], inf));
 	freq = (DegreeToKey.ar(3, deg) + 40).midicps;
-	freq = freq * { Rand(-0.1, 0.1).midiratio }.dup(4);
+	freq = freq * { Rand(-0.1, 0.1).midicps }.dup(4);
 	sig = Saw.ar(freq);
 	sig = Splay.ar(sig);
 
