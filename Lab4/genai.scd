@@ -6,7 +6,19 @@ s.quit;
 s.scope;
 
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
+
+
 (
+
+// Läs in ljudfiler här
+var birdSound1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_bees.wav");
+var birdSound2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_bees_2.wav");
+var windSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/soft_wind.wav");
+var stepSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/footstep_snow.wav");
+var fireSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/fireplace.wav");
+var rainSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/rain_on_surface.wav");
+
+
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 SynthDef(\temperatureSynth, { arg frequency = 220, level = 0;
@@ -15,6 +27,38 @@ SynthDef(\temperatureSynth, { arg frequency = 220, level = 0;
 	Out.ar(0, {output}!2);
 }).add;
 
+SynthDef(\birdSound1, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
+
+SynthDef(\birdSound2, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
+
+SynthDef(\windSound, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
+SynthDef(\stepSound, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
+SynthDef(\fireSound, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
+SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0|
+	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, output ! 2);
+}).add;
 )
 
 (
@@ -25,6 +69,14 @@ SynthDef(\temperatureSynth, { arg frequency = 220, level = 0;
 
 // Synthinstansen för temperaturen
 ~temperatureSynth = Synth.new(\temperatureSynth);
+~birdSound1 = Synth.new(\birdSound1);
+~birdSound2 = Synth.new(\birdSound2);
+~windSound = Synth.new(\windSound);
+~stepSound = Synth.new(\stepSound);
+~fireSound = Synth.new(\fireSound);
+~rainSound = Synth.new(\rainSound);
+
+
 
 // En del GUI-grejer
 w = Window.new("Thermometer",
@@ -133,35 +185,40 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 
 
 
-
 // När slidern klickas spelas ljudet från temperatursynthen upp
 ~slider.mouseDownAction = {
 	~temperatureSynth.set(\level, 1);
+
+
 };
 ~slider.mouseUpAction = {
 	~temperatureSynth.set(\level, 0);
+
+
 };
 
 // Följande funktioner ropas på när de olika väderförhållandena väljs
 ~sunAction = {
 	if (~sunFlag) {
 		("Sun").postln;
+		~birdSound1.set(\level, 1);
 	} {
-		("No sun").postln;
+		(" noSun").postln;
+		~birdSound1.set(\level, 0);
 	};
 };
 ~rainAction = {
 	if (~rainFlag) {
-		("Rain").postln;
+		("rain").postln;
 	} {
-		("No rain").postln;
+		("no rain").postln;
 	};
 };
 ~snowAction = {
 	if (~snowFlag) {
-		("Snow").postln;
+		("snow").postln;
 	} {
-		("No snow").postln;
+	("no snow").postln;
 	};
 };
 
@@ -173,17 +230,6 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 
 	// När temperaturen ändras gör söker med ljudet här
 	~temperatureSynth.set(\frequency, linexp(temperature, -20, 40, 110, 880));
-
-
-
-
-
-
-
-
-
-
-
 
 
 
