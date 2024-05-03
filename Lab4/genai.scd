@@ -223,14 +223,14 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 
     // Check sunFlag before adjusting levels
 	if (~sunFlag) {
-		if(temperature > 0){
+		if (temperature > 20) {
 			~birdSound1.set(\level, temperature);
 			~windSound.set(\level, 0);
-		};
-		if(temperature <= 20){
+		} {
 			~birdSound1.set(\level, 0);
 			~windSound.set(\level, temperature);
 		};
+
 	};
 
 	// Följande justerar bakgrundsfärgen i GUIt
