@@ -7,6 +7,16 @@ s.scope;
 
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 
+<<<<<<< Updated upstream
+=======
+~birdSoundBuffer1 = Buffer.read(s, "bird_bees.wav");
+~birdSoundBuffer2 = Buffer.read(s, "bird_bees_2.wav");
+~windSoundBuffer = Buffer.read(s, "soft_wind.wav");
+~stepSoundBuffer = Buffer.read(s, "footstep_snow.wav");
+~fireSoundBuffer = Buffer.read(s, "fireplace.wav");
+~rainSoundBuffer = Buffer.read(s, "rain_on_surface.wav");
+
+>>>>>>> Stashed changes
 
 (
 
@@ -27,6 +37,7 @@ SynthDef(\temperatureSynth, { arg frequency = 220, level = 0;
 	Out.ar(0, {output}!2);
 }).add;
 
+<<<<<<< Updated upstream
 SynthDef(\birdSound1, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
 	var output = sound * level.lag(0.5);
@@ -58,6 +69,41 @@ SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
+=======
+SynthDef(\birdSound1, {
+   arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~birdSoundBuffer1.bufnum, doneAction: 2);
+	var output = sound * level.lag(0.5);
+	Out.ar(out, {output}!2 );
+}).add;
+
+SynthDef(\birdSound2, {
+    arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~birdSoundBuffer2.bufnum, doneAction: 2);
+	Out.ar(out, sound * level);
+}).add;
+
+SynthDef(\windSound, {
+    arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~windSoundBuffer.bufnum, doneAction: 2);
+	Out.ar(out, sound * level);
+}).add;
+SynthDef(\stepSound, {
+   arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~stepSoundBuffer.bufnum, doneAction: 2);
+	Out.ar(out, sound * level);
+    Out.ar(0, sound * amp);
+}).add;
+SynthDef(\fireSound, {
+    arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~fireSoundBuffer.bufnum, doneAction: 2);
+	Out.ar(out, sound * level);
+}).add;
+SynthDef(\rainSound, {
+    arg out = 0, level = 1;
+	var sound = PlayBuf.ar(1, ~rainSoundBuffer.bufnum, doneAction: 2);
+	Out.ar(out, sound * level);
+>>>>>>> Stashed changes
 }).add;
 )
 
@@ -76,7 +122,10 @@ SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0|
 ~fireSound = Synth.new(\fireSound);
 ~rainSound = Synth.new(\rainSound);
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 
 // En del GUI-grejer
 w = Window.new("Thermometer",
@@ -187,6 +236,7 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 
 // När slidern klickas spelas ljudet från temperatursynthen upp
 ~slider.mouseDownAction = {
+<<<<<<< Updated upstream
 	~temperatureSynth.set(\level, 1);
 
 
@@ -195,30 +245,55 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 	~temperatureSynth.set(\level, 0);
 
 
+=======
+	//~temperatureSynth.set(\level, 1);
+	~birdSound1.set(\level, 1);
+};
+~slider.mouseUpAction = {
+	//~temperatureSynth.set(\level, 0);
+	~birdSound1.set(\level, 0);
+>>>>>>> Stashed changes
 };
 
 // Följande funktioner ropas på när de olika väderförhållandena väljs
 ~sunAction = {
 	if (~sunFlag) {
+<<<<<<< Updated upstream
 		("Sun").postln;
 		~birdSound1.set(\level, 1);
 	} {
 		(" noSun").postln;
+=======
+		~birdSound1.set(\level, 1);
+	} {
+>>>>>>> Stashed changes
 		~birdSound1.set(\level, 0);
 	};
 };
 ~rainAction = {
 	if (~rainFlag) {
+<<<<<<< Updated upstream
 		("rain").postln;
 	} {
 		("no rain").postln;
+=======
+		~rainSound.set(\level, 1);
+	} {
+		~rainSound.set(\level, 0);
+>>>>>>> Stashed changes
 	};
 };
 ~snowAction = {
 	if (~snowFlag) {
+<<<<<<< Updated upstream
 		("snow").postln;
 	} {
 	("no snow").postln;
+=======
+		~stepSound.set(\level, 1);
+	} {
+		~stepSound.set(\level, 0);
+>>>>>>> Stashed changes
 	};
 };
 
@@ -232,6 +307,27 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 	~temperatureSynth.set(\frequency, linexp(temperature, -20, 40, 110, 880));
 
 
+<<<<<<< Updated upstream
+=======
+	// Spela ljud baserat på väderförhållandena
+	if (~sunFlag) {
+		~birdSound1.set(\level, 1);
+	} {
+		~birdSound1.set(\level, 0);
+	};
+	if (~rainFlag) {
+		~rainSound.set(\level, 1);
+	} {
+		~rainSound.set(\level, 0);
+	};
+	if (~snowFlag) {
+		~stepSound.set(\level, 1);
+	} {
+		~stepSound.set(\level, 0);
+	};
+
+
+>>>>>>> Stashed changes
 
 	// Följande justerar bakgrundsfärgen i GUIt
 	hue = linlin(temperature, -20, 40, 0.6, 0.1);
