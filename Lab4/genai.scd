@@ -223,7 +223,7 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 
     // Check sunFlag before adjusting levels
 	if (~sunFlag) {
-		if(temperature > 20){
+		if(temperature > 0){
 			~birdSound1.set(\level, temperature);
 			~windSound.set(\level, 0);
 		};
