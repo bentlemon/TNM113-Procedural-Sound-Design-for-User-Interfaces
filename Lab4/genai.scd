@@ -7,16 +7,6 @@ s.scope;
 
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 
-<<<<<<< Updated upstream
-=======
-~birdSoundBuffer1 = Buffer.read(s, "bird_bees.wav");
-~birdSoundBuffer2 = Buffer.read(s, "bird_bees_2.wav");
-~windSoundBuffer = Buffer.read(s, "soft_wind.wav");
-~stepSoundBuffer = Buffer.read(s, "footstep_snow.wav");
-~fireSoundBuffer = Buffer.read(s, "fireplace.wav");
-~rainSoundBuffer = Buffer.read(s, "rain_on_surface.wav");
-
->>>>>>> Stashed changes
 
 (
 
@@ -25,85 +15,44 @@ var birdSound1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_b
 var birdSound2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_bees_2.wav");
 var windSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/soft_wind.wav");
 var stepSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/footstep_snow.wav");
-//var fireSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/fireplace.wav");
+var fireSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/fireplace.wav");
 var rainSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/rain_on_surface.wav");
 
 
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-SynthDef(\temperatureSynth, { arg frequency = 220, level = 0;
-	var output = SinOsc.ar(freq: frequency, mul: 0.3) * level.lag(0.5);
-
-	Out.ar(0, {output}!2);
-}).add;
-
-<<<<<<< Updated upstream
+// Vi vill ha doneAction: 1 för att pausa och inte släppa synten --> blir problem när man väljer en ikon igen i samma körning
 SynthDef(\birdSound1, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 
 SynthDef(\birdSound2, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 
 SynthDef(\windSound, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 SynthDef(\stepSound, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 SynthDef(\fireSound, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, doneAction: 2);
+	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 1);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
-=======
-SynthDef(\birdSound1, {
-   arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~birdSoundBuffer1.bufnum, doneAction: 2);
-	var output = sound * level.lag(0.5);
-	Out.ar(out, {output}!2 );
-}).add;
-
-SynthDef(\birdSound2, {
-    arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~birdSoundBuffer2.bufnum, doneAction: 2);
-	Out.ar(out, sound * level);
-}).add;
-
-SynthDef(\windSound, {
-    arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~windSoundBuffer.bufnum, doneAction: 2);
-	Out.ar(out, sound * level);
-}).add;
-SynthDef(\stepSound, {
-   arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~stepSoundBuffer.bufnum, doneAction: 2);
-	Out.ar(out, sound * level);
-    Out.ar(0, sound * amp);
-}).add;
-SynthDef(\fireSound, {
-    arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~fireSoundBuffer.bufnum, doneAction: 2);
-	Out.ar(out, sound * level);
-}).add;
-SynthDef(\rainSound, {
-    arg out = 0, level = 1;
-	var sound = PlayBuf.ar(1, ~rainSoundBuffer.bufnum, doneAction: 2);
-	Out.ar(out, sound * level);
->>>>>>> Stashed changes
 }).add;
 )
 
@@ -122,10 +71,7 @@ SynthDef(\rainSound, {
 ~fireSound = Synth.new(\fireSound);
 ~rainSound = Synth.new(\rainSound);
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
+//  ------------------------------------------------ GUI ------------------------------------------------ //
 
 // En del GUI-grejer
 w = Window.new("Thermometer",
@@ -224,7 +170,7 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 });
 ~slider = Slider(u, Rect(20, 20, 840, 60))
 .value_(0.5);
-
+//  ----------------------------------------------------------------------------------------------- //
 
 
 
@@ -232,102 +178,60 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 // --------------- Här nedan börjar det roliga -----------
 // -------------------------|||||-------------------------
 
-
-
 // När slidern klickas spelas ljudet från temperatursynthen upp
 ~slider.mouseDownAction = {
-<<<<<<< Updated upstream
-	~temperatureSynth.set(\level, 1);
+
 
 
 };
 ~slider.mouseUpAction = {
-	~temperatureSynth.set(\level, 0);
-
-
-=======
-	//~temperatureSynth.set(\level, 1);
-	~birdSound1.set(\level, 1);
-};
-~slider.mouseUpAction = {
-	//~temperatureSynth.set(\level, 0);
 	~birdSound1.set(\level, 0);
->>>>>>> Stashed changes
+    ~windSound.set(\level, 0);
+
 };
 
 // Följande funktioner ropas på när de olika väderförhållandena väljs
 ~sunAction = {
 	if (~sunFlag) {
-<<<<<<< Updated upstream
 		("Sun").postln;
-		~birdSound1.set(\level, 1);
+
 	} {
 		(" noSun").postln;
-=======
-		~birdSound1.set(\level, 1);
-	} {
->>>>>>> Stashed changes
 		~birdSound1.set(\level, 0);
+		~windSound.set(\level, 0);
 	};
 };
 ~rainAction = {
 	if (~rainFlag) {
-<<<<<<< Updated upstream
 		("rain").postln;
 	} {
 		("no rain").postln;
-=======
-		~rainSound.set(\level, 1);
-	} {
-		~rainSound.set(\level, 0);
->>>>>>> Stashed changes
 	};
 };
 ~snowAction = {
 	if (~snowFlag) {
-<<<<<<< Updated upstream
 		("snow").postln;
 	} {
 	("no snow").postln;
-=======
-		~stepSound.set(\level, 1);
-	} {
-		~stepSound.set(\level, 0);
->>>>>>> Stashed changes
 	};
 };
 
 // Följande funktion körs när slidern flyttas på
 ~slider.action_({ arg obj;
 	var hue, string; // två variabler för GUIt
-	// Följande skalar om sliderns värde till en float mellan -20 och 40
-	var temperature = (linlin(obj.value, 0, 1, -20, 40)*10).round/10;
+    var temperature = linlin(obj.value, 0, 1, -20, 40).round(0.1); // Slider value mapped to temperature range
 
-	// När temperaturen ändras gör söker med ljudet här
-	~temperatureSynth.set(\frequency, linexp(temperature, -20, 40, 110, 880));
-
-
-<<<<<<< Updated upstream
-=======
-	// Spela ljud baserat på väderförhållandena
+    // Check sunFlag before adjusting levels
 	if (~sunFlag) {
-		~birdSound1.set(\level, 1);
-	} {
-		~birdSound1.set(\level, 0);
+		if(temperature > 20){
+			~birdSound1.set(\level, temperature);
+			~windSound.set(\level, 0);
+		};
+		if(temperature <= 20){
+			~birdSound1.set(\level, 0);
+			~windSound.set(\level, temperature);
+		};
 	};
-	if (~rainFlag) {
-		~rainSound.set(\level, 1);
-	} {
-		~rainSound.set(\level, 0);
-	};
-	if (~snowFlag) {
-		~stepSound.set(\level, 1);
-	} {
-		~stepSound.set(\level, 0);
-	};
-
-
->>>>>>> Stashed changes
 
 	// Följande justerar bakgrundsfärgen i GUIt
 	hue = linlin(temperature, -20, 40, 0.6, 0.1);
@@ -340,8 +244,6 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 	u.background_(Color.hsv(hue, 0.2, 1, 0.5));
 
 });
-
-
 
 
 // Följande stänger fönstret när processen stängs
