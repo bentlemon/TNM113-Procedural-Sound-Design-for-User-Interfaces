@@ -15,7 +15,7 @@ var birdSound1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_b
 var birdSound2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/bird_bees_2.wav");
 var windSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/soft_wind.wav");
 var stepSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/footstep_snow.wav");
-var fireSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/fireplace.wav");
+//var fireSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/fireplace.wav");
 var rainSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/rain_on_surface.wav");
 
 
