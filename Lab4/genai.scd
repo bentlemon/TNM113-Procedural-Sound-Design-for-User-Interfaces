@@ -21,16 +21,9 @@ var rainSound = Buffer.read(s, thisProcess.nowExecutingPath.dirname ++ "/rain_on
 
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-// Vi vill ha doneAction: 1 för att pausa och inte släppa synten --> blir problem när man väljer en ikon igen i samma körning
 SynthDef(\birdSound1, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 0);
 	var output = sound * level;
-	Out.ar(out, output ! 2);
-}).add;
-
-SynthDef(\birdSound2, { |out = 0, level = 0, bufnum = 0|
-	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 0);
-	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
 
@@ -39,16 +32,19 @@ SynthDef(\windSound, { |out = 0, level = 0, bufnum = 0|
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
+
 SynthDef(\stepSound, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 0);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
+
 SynthDef(\fireSound, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 0);
 	var output = sound * level.lag(0.5);
 	Out.ar(out, output ! 2);
 }).add;
+
 SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0|
 	var sound = PlayBuf.ar(1, bufnum, loop: 1, doneAction: 0);
 	var output = sound * level.lag(0.5);
@@ -220,7 +216,7 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 ~slider.action_({ arg obj;
 	var hue, string; // två variabler för GUIt
     var temperature = linlin(obj.value, 0, 1, -20, 40).round(0.1); // Slider value mapped to temperature range
-    var temperature_test = linlin(obj.value, 0, 1, 0, 40).round(0.1); // Slider value mapped to temperature range
+    var temperature_test = linlin(obj.value, 0, 1, 0, 40); // Slider value mapped to temperature range
 
     // Check sunFlag before adjusting levels
 	if (~sunFlag) {
@@ -229,7 +225,6 @@ u = UserView(w, Rect(0, 0, 1024, 500))
 			~windSound.set(\level, 0);
 		} {
 			~birdSound1.set(\level, 0);
-			~windSound.set(\level, temperature_test);
 		};
 
 	};
