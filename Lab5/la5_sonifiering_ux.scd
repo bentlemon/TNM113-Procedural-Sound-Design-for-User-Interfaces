@@ -15,13 +15,23 @@ SynthDef(\dataSonification, { arg freq;
 	Out.ar(0, {output}!2);
 }).add;
 
+SynthDef(\errorSonification, { arg midiNote1 = 60, midiNote2 = 65, gate = 0;
+
+	var sin = SinOsc.ar(rrand(midiNote1, midiNote2).midicps);
+
+	var env = Env.perc(0.001, 0.3, 1.7, -2);
+	var out = sin * EnvGen.kr(env, gate, doneAction: 0);
+
+	Out.ar(0, {out}!2);
+}).add;
 
 )
 
 
 (
 // Följande registrerar dataSonification synthdefinitionen på servern
-~dataSynth = Synth.new(\dataSonification).register;
+//~dataSynth = Synth.new(\dataSonification).register;
+
 
 // Följande är en OSC-lyssnare för level-meddelanden
 OSCdef(\levelListener, { arg inputmsg;
@@ -31,7 +41,11 @@ OSCdef(\levelListener, { arg inputmsg;
 			// Detta plockar ut level ur meddelandet som ett heltal
 			// och sparar i environment-variabeln
 			~statusLevel = inputmsg[1].asInteger;
+			//~statusLevel.postln; // De olika nivåerna
 		};
+
+
+
 	};
 }, 'level');
 
@@ -48,7 +62,7 @@ OSCdef(\dataListener, { arg inputmsg;
 			// som returnerar värdet och sparar det i frequency-variabeln
 			frequency = ~mapPitch.value(~currentData);
 			// Följande skickar värdet, frekvensen, till synthdefinitionen
-			~dataSynth.set(\freq, frequency);
+			//~dataSynth.set(\freq, frequency);
 		};
 	};
 }, 'data');
@@ -60,6 +74,8 @@ OSCdef(\errorListener, { arg inputmsg;
 		// och sparar i environment-variabeln
 		~errorMessage = inputmsg[1];
 		~errorMessage.postln;
+		~errorSynth = Synth.new(\errorSonification).register;
+		~errorSynth.set(\gate, 1);
 	};
 }, 'error');
 
