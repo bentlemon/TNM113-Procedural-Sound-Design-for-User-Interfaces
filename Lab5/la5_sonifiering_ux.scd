@@ -38,7 +38,7 @@ SynthDef(\dataLevels, { arg freq, trig;
 
 (
 // Följande registrerar dataSonification synthdefinitionen på servern
-~dataSynth = Synth.new(\dataSonification).register;
+//~dataSynth = Synth.new(\dataSonification).register;
 ~dataLevels = Synth.new(\dataLevels).register;
 
 // Följande är en OSC-lyssnare för level-meddelanden
@@ -56,18 +56,18 @@ OSCdef(\levelListener, { arg inputmsg;
 			};
 			if(~statusLevel == 1) {
 				~dataLevels = Synth.new(\dataLevels, [\freq, 392.00]);
-				//~statusLevel.postln;
+				~statusLevel.postln;
 
 			};
 			if(~statusLevel == 2) {
 				~dataLevels = Synth.new(\dataLevels, [\freq, 440.00]);
 
-				//~statusLevel.postln;
+				~statusLevel.postln;
 			};
 			if(~statusLevel == 3){
 				~dataLevels = Synth.new(\dataLevels, [\freq, 493.88]);
 
-				//~statusLevel.postln;
+				~statusLevel.postln;
 
 			};
 
@@ -89,7 +89,7 @@ OSCdef(\dataListener, { arg inputmsg;
 			// som returnerar värdet och sparar det i frequency-variabeln
 			frequency = ~mapPitch.value(~currentData);
 			// Följande skickar värdet, frekvensen, till synthdefinitionen
-			~dataSynth.set(\freq, frequency);
+			//~dataSynth.set(\freq, frequency);
 		};
 	};
 }, 'data');
