@@ -95,7 +95,6 @@ SynthDef(\rainSound, { |out = 0, level = 0, bufnum = 0, rainLevel = 0.08, cutoff
 	// Generera regnljud med slumpmässigt brus
 	rain = PinkNoise.ar * rainLevel;
 
-	// Tillämpa ett lågpassfilter på regnljudet för att göra det mjukare
 	filteredRain = LPF.ar(rain, cutoffFreq);
 
 	sound = sound * level.lag(0.001) + filteredRain;
