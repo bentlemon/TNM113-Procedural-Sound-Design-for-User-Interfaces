@@ -7,30 +7,36 @@ s.scope;
 
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 (
+
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
-/*SynthDef(\dataSonification, { arg freq ;
-	var output = LFTri.ar(0);
+SynthDef(\dataSonification, { arg freq;
 
-	Out.ar(0, {output}!2);
-}).add;*/
-
-(
-
-SynthDef(\dataLevels, { arg freq, trig;
-
-	var detuneAmount = 0.1;
+	var detuneAmount = 0.02;
 	var detune = freq * detuneAmount;
 	var sine1 = SinOsc.ar(freq: freq + detune);
 	var sine2 = SinOsc.ar(freq: freq - detune);
 	var output = sine1 + sine2 / 2;
-	output = output * EnvGen.ar(Env.perc(0.01, 0.1, 1, 0), trig, doneAction: 2) * 0.5;
+	output = LPF.ar(output, 900)*0.1;
+
+	Out.ar(0, {output}!2);
+}).add;
+
+
+
+
+SynthDef(\dataLevels, { arg freq;
+
+	var output = LFTri.ar(freq);
+	output = output * EnvGen.ar(Env.perc(0.01, 0.01, 0.5, -8), doneAction: 2);
+
+	output = LPF.ar(output, 700);
 
 
 	Out.ar(0, {output}!2);
 }).add;
 
-)
+
 
 
 )
@@ -38,7 +44,7 @@ SynthDef(\dataLevels, { arg freq, trig;
 
 (
 // Följande registrerar dataSonification synthdefinitionen på servern
-//~dataSynth = Synth.new(\dataSonification).register;
+~dataSynth = Synth.new(\dataSonification).register;
 ~dataLevels = Synth.new(\dataLevels).register;
 
 // Följande är en OSC-lyssnare för level-meddelanden
@@ -52,20 +58,20 @@ OSCdef(\levelListener, { arg inputmsg;
 			~statusLevel = inputmsg[1].asInteger;
 			if(~statusLevel == 0) {
 
-				~statusLevel.postln;
+				//~statusLevel.postln;
 			};
 			if(~statusLevel == 1) {
-				~dataLevels = Synth.new(\dataLevels, [\freq, 392.00]);
+				~dataLevels = Synth.new(\dataLevels, [\freq, 440.00]);
 				~statusLevel.postln;
 
 			};
 			if(~statusLevel == 2) {
-				~dataLevels = Synth.new(\dataLevels, [\freq, 440.00]);
+				~dataLevels = Synth.new(\dataLevels, [\freq, 523.25]);
 
 				~statusLevel.postln;
 			};
 			if(~statusLevel == 3){
-				~dataLevels = Synth.new(\dataLevels, [\freq, 493.88]);
+				~dataLevels = Synth.new(\dataLevels, [\freq, 659.26]);
 
 				~statusLevel.postln;
 
@@ -89,7 +95,7 @@ OSCdef(\dataListener, { arg inputmsg;
 			// som returnerar värdet och sparar det i frequency-variabeln
 			frequency = ~mapPitch.value(~currentData);
 			// Följande skickar värdet, frekvensen, till synthdefinitionen
-			//~dataSynth.set(\freq, frequency);
+			~dataSynth.set(\freq, frequency);
 		};
 	};
 }, 'data');
