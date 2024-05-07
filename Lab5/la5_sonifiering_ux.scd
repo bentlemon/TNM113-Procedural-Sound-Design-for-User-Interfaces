@@ -136,7 +136,7 @@ OSCdef(\errorListener, { arg inputmsg;
 			~errorSynth = Synth.new(\errorSonification).register;
 			~errorSynth.set(\midiNote1, 72);// C5
 			~errorSynth.set(\midiNote2, 77); // F5
-			~errorSynth.set(\vol, 1.5);
+			~errorSynth.set(\vol, 1.0);
 			~errorSynth.set(\gate, 1);
 		};
 
