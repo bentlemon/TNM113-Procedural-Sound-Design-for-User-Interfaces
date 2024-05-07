@@ -34,11 +34,12 @@ SynthDef(\dataLevels, { arg freq;
 }).add;
 
 
-SynthDef(\errorSonification, { arg midiNote1 = 60, midiNote2 = 65, gate = 0, vol = 0.7;
+SynthDef(\errorSonification, { arg midiNote1 = 60, midiNote2 = 65,
+	gate = 0, vol = 0.7;
 
-	var sin = SinOsc.ar(rrand(midiNote1, midiNote2).midicps);
+	var sin = SinOsc.ar(rrand(midiNote1, midiNote2).midicps);  // rrand linear distribution in the given range
 
-	var env = Env.perc(0.001, 0.3, 1.7, -2);
+	var env = Env.perc(0.001, 0.3, 1.7, -2); // (Attack, release, level, curve)
 	var out = sin * EnvGen.kr(env, gate, doneAction: 0);
 
 	Out.ar(0, {out * vol}!2);
