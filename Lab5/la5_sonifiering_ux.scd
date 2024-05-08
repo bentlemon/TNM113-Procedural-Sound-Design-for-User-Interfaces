@@ -52,6 +52,7 @@ SynthDef(\errorSonification, { arg midiNote1 = 60, midiNote2 = 65, gate = 0, vol
 // Följande registrerar dataSonification synthdefinitionen på servern
 ~dataSynth = Synth.new(\dataSonification).register;
 ~dataLevels = Synth.new(\dataLevels).register;
+~errorSonification = Synth.new(\errorSonification).register;
 
 // Följande är en OSC-lyssnare för level-meddelanden
 // 0, 1, 2, 3
@@ -63,23 +64,23 @@ OSCdef(\levelListener, { arg inputmsg;
 			// och sparar i environment-variabeln
 			~statusLevel = inputmsg[1].asInteger;
 			if(~statusLevel == 0) {
-
-				//~statusLevel.postln;
+				~dataLevels = Synth.new(\dataLevels, [\freq, 0]);
+				~statusLevel.postln;
 			};
 			if(~statusLevel == 1) {
 				~dataLevels = Synth.new(\dataLevels, [\freq, 440.00]);
-				~statusLevel.postln;
+				//~statusLevel.postln;
 
 			};
 			if(~statusLevel == 2) {
 				~dataLevels = Synth.new(\dataLevels, [\freq, 523.25]);
 
-				~statusLevel.postln;
+				//~statusLevel.postln;
 			};
 			if(~statusLevel == 3){
 				~dataLevels = Synth.new(\dataLevels, [\freq, 659.26]);
 
-				~statusLevel.postln;
+			//	~statusLevel.postln;
 
 			};
 
