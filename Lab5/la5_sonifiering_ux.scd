@@ -67,6 +67,7 @@ OSCdef(\levelListener, { arg inputmsg;
 
 			if(~statusLevel == 0) {
 				//~statusLevel.postln;
+				~dataLevels = Synth.new(\dataLevels, [\freq, 0]);
 			};
 
 			if(~statusLevel == 1) {
