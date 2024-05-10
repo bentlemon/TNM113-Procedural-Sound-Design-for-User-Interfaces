@@ -5,6 +5,10 @@ s.quit;
 // Start oscilloscope
 s.scope;
 
+s.record;
+
+
+
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 (
 

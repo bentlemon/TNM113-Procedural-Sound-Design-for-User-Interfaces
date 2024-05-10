@@ -5,6 +5,8 @@ s.quit;
 // Start oscilloscope
 s.scope;
 
+s.record;
+
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
 (
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
@@ -26,8 +28,6 @@ SynthDef(\samplePlayer, { arg bufnum = 0;
 }).add;
 
 )
-
-
 
 
 // Klientside skript
