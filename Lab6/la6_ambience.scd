@@ -17,6 +17,7 @@ SynthDef(\chordSynth, { arg bus, freq, gate = 0, level = 0;
 	var output = filtered * envelope * level.lag(1);
 	Out.ar(bus, {output}!2);
 }).add;
+
 SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0;
 	var sqrWave = LFPulse.ar(freq: freq / 2, width: 0.5, mul: 0.1);
 	var filtered = LPF.ar(sqrWave, 500);
@@ -40,6 +41,7 @@ SynthDef(\doorbellSamplePlayer, { arg bus, bufnum = 0, t_gate = 0, level = 0;
 	var output = sound * 0.015 * level;
 	Out.ar(bus, {output}!2);
 }).add;
+
 SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
@@ -55,16 +57,54 @@ SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 	Out.ar(bus, {output}!2);
 }).add;
 
+SynthDef(\tempratureSamplePayer, { arg bus, gate = 0, level = 0, midiNote1 = 60, midiNote2 = 64, midiNote3 = 67;
+	var sin = SinOsc.ar(midiNote1.midicps);
+	var sin2 = SinOsc.ar(midiNote2.midicps);
+	var sin3 = SinOsc.ar(midiNote3.midicps);
+	var env = Env.perc(0.01, 0.3, 1, -8); // (Attack, release, level, curve)
+	var out = (sin + sin2 + sin3) * EnvGen.kr(env, gate, doneAction: 0);
+
+	Out.ar(0, {out * level}!2);
+}).add;
+
+SynthDef(\champSamplerPlayer, {arg bufnum = 0, level = 1.0, trigger = 0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: trigger,
+		startPos: 0,
+		loop: 0,
+		doneAction: 2
+	);
+	sound = sound * level;
+
+	Out.ar(0, sound);
+}).add;
+
+SynthDef(\houseSamplerPlayer, {arg bufnum = 0, level = 1.0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: 1,
+		startPos: 0,
+		loop: 0,
+		doneAction: 2
+	);
+	sound = sound * level;
+
+	Out.ar(0, sound);
+}).add;
 
 // Effects and output
 SynthDef(\outputEffects, {arg inputbus, bus;
 	var input = In.ar(inputbus, numChannels: 2);
 	var reverbed = FreeVerb.ar(in: input, mix: 1, room: 0.5, damp: 0.1, mul: 1.0);
-	var echo = Greyhole.ar(in: input, delayTime: 2.5, damp: 0.5, diff: 0.8, feedback: 0.5);
-	var roomEffects = reverbed + echo;
-	var output = input + (roomEffects * 0.75);
+	var output = input + (reverbed * 0.75);
 	Out.ar(bus, output);
 }).add;
+
 SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 	var output = In.ar(inputbus, numChannels: 2);
 	output = output * level;
@@ -85,14 +125,6 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 // Toner i ackordet 0 = C, Eb, G; 1 = C, D, G; 2 = C, F, G; 3 = D, G, B
 ~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
 
-// Följande ackord ger en lite mer lättsam (?) ackordföljd
-// Toner i ackordet 0 = C, E, G; 1 = D, G, B; 2 = C, E, A; 3 = C, F, A
-//~chordDictionary = Dictionary[0 -> [60, 64, 67], 1 -> [62, 67, 71], 2 -> [60, 64, 69], 3 -> [60, 65, 69]];
-
-// Följande ackord ger en lite mer dyster (?) ackordföljd
-// Toner i ackordet 0 = B, D, G; 1 = B, D#, F#; 2 = C, E, G; 3 = C, Eb, G
-//~chordDictionary = Dictionary[0 -> [55, 59, 62], 1 -> [59, 63, 66], 2 -> [60, 64, 67], 3 -> [60, 63, 67]];
-
 ~chordNumber = 0;
 // Skapa ett dictionary för att stoppa ackordsyntarna i
 ~chordSynthDictionary = Dictionary.new;
@@ -106,14 +138,6 @@ for (0, 2) { arg index;
 // Toner i basen C, C, F, G
 ~bassNoteNumbersToUse = [60, 50, 53, 55];
 
-// Följande toner funkar till den lite mer lättsamma ackordföljden
-// Toner i basen C, G, A, F
-//~bassNoteNumbersToUse = [60, 55, 57, 53];
-
-// Följande toner funkar till den lite mer dystra ackordföljden
-// Toner i basen G, B, C, C (en oktav ner)
-//~bassNoteNumbersToUse = [55, 59, 60, 48];
-
 // Registera bassynten på servern och skicka med effektbussen
 ~bassSynth = Synth.new(\bassSynth, [~outputEffectBus.index;]).register;
 ~bassLevel = 0;
@@ -123,6 +147,12 @@ for (0, 2) { arg index;
 ~bellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/bell2.wav");
 // Läs in dörrklockljudet
 ~doorbellSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/doorbell2.wav");
+
+~tempSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/doorbell.wav");
+
+~champSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/champagne.flac");
+
+~houseSample = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/house.wav");
 
 
 // En environmentvariabel som håller koll på antal personer i lobbyn
@@ -134,9 +164,10 @@ for (0, 2) { arg index;
 ~startFlag = true; // En flagga som används för att starta klockan (en gång) när det första OSC-meddelandet tas emot
 ~stopflag = false; // En flagga som används när dagen är slut och sedan stoppar uppspelningen
 ~oldHour = 0; // En variabel som används för att kolla om timmen som kommer via OSC är en ny timme eller inte
+~min = 0;
+~oldTemp = 0.0;
 
 
-// Här följer sequencerfunktionen. Den anropas efter att det första OSC-meddelandet tagits emot och tempoklockan har startats. Sequencern räknar till 8 slag, dvs två takter, när det 9 slaget kommer ska syntarnas "tangenter" släppas (dvs gate sätts till 0), och uppspelningen börjar om från 1 men med nästa ackord. När det fjärde ackordet tas, dvs ~chordNumner är större än 3, ska ackordordningen börja om från det första ackordet. När allt är klart, dvs ~stopFlag har satts till true, ska ackorden gå klart och det första ackordet spelas upp igen så att "låten" avslutas med rätt ackord.
 ~sequencingFunction = {
 	~tempoClock.schedAbs(0, {
 		// Om ~beatCounter är på första slaget, 1, sätt rätt toner till syntarna
@@ -172,6 +203,7 @@ for (0, 2) { arg index;
 	});
 };
 
+~houseFlag = true;
 
 // Följande är en OSC-lyssnare för tids-meddelanden
 OSCdef(\timeListener, { arg inputmsg;
@@ -184,10 +216,18 @@ OSCdef(\timeListener, { arg inputmsg;
 		};
 		// Uppdatera ~hour med inkommande OSC-meddelande
 		~hour = inputmsg[1];
+		~min = inputmsg[2].asInteger;
+		~min.postln;
+
 		// Om det är en ny timme, ropa på ~hourSyncedStuff och uppdatera ~oldHour
 		if (~hour != ~oldHour) {
 			~hourSyncedStuff.value;
 			~oldHour = ~hour;
+		};
+
+		if ((~hour >= 20) && (~min > 13) && (~houseFlag)) {
+			Synth.new(\houseSamplerPlayer, [\bufnum, ~houseSample;]);
+			~houseFlag = false;
 		};
 	};
 }, 'time');
@@ -201,32 +241,30 @@ OSCdef(\timeListener, { arg inputmsg;
 			~playbell.value;
 
 			// Sätt ljudvolymen för de procedurella syntarna, vilken sedan sätts i sequencerfunktionen
-			~chordLevel = 0.25;
+			~chordLevel = 0.0;
 			~bassLevel = 0;
 		},
 		11, { // Lunch
 			~playbell.value;
 
-			~chordLevel = 0.5;
-			~bassLevel = 0.25;
+			~chordLevel = 0.0;
+			~bassLevel = 0.0;
 		},
 		13, { // Afternoon
 			~playbell.value;
 
-			~chordLevel = 0.25;
-			~bassLevel = 0.5;
+			~chordLevel = 0.0;
+			~bassLevel = 0.0;
 		},
 		17, { // Evening
 			~playbell.value;
 
-			~chordLevel = 0.5;
-			~bassLevel = 1;
+			~chordLevel = 0.0;
+			~bassLevel = 0;
 		},
-		20, { // Happy hour
+		20, { // Happy hour --> Champange
 			~playbell.value;
-
-			~chordLevel = 1;
-			~bassLevel = 1;
+			Synth.new(\champSamplerPlayer, [\bufnum, ~champSample, \bus, ~outputEffectBus.index, \level, 1.2, \trigger, 1;]);
 		},
 		23, { // Closed
 			~playbell.value;
@@ -240,7 +278,7 @@ OSCdef(\timeListener, { arg inputmsg;
 
 // Följande funktion spelar upp klockljudet, eftersom synthdefinitionen har en doneAction på 2 tas den syntinstansen bort från servern när samplingen har spelats upp. Därför kan vi bekvämt skapa en ny instans varje gång vi spelar upp ljudet.
 ~playbell = {
-	Synth.new(\bellSamplePlayer, [\bufnum, ~bellSample, \bus, ~outputEffectBus.index, \level, 1;]);
+	Synth.new(\bellSamplePlayer, [\bufnum, ~bellSample, \bus, ~outputEffectBus.index, \level, 0;]);
 };
 
 
@@ -249,7 +287,7 @@ OSCdef(\personListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
 		var inputPerson = inputmsg[1].asInteger;
 		if (inputPerson > ~numberOfPersons) {
-			Synth.new(\doorbellSamplePlayer, [\bufnum, ~doorbellSample, \bus, ~outputEffectBus.index, \level, 1;]);
+			Synth.new(\doorbellSamplePlayer, [\bufnum, ~doorbellSample, \bus, ~outputEffectBus.index, \level, 0;]);
 		};
 		~numberOfPersons = inputPerson;
 	};
@@ -260,8 +298,21 @@ OSCdef(\personListener, { arg inputmsg;
 OSCdef(\temperatureListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
 		var inputTemperature = inputmsg[1].asFloat;
-		inputTemperature = linlin(inputTemperature, 19.7, 22.3, 0.3, 1);
-		~outputChannel.set(\level, inputTemperature);
+		var diffTemp = ~oldTemp - inputTemperature;
+		var absDiffTemp = diffTemp.abs;
+
+		// Tempen sänks --> A minor chord
+		if(diffTemp >= 0.1){
+			Synth.new(\tempratureSamplePayer, [\bus, ~outputEffectBus.index, \level, 0.4, \gate, 1, \midiNote1, 69, \midiNote2, 72, \midiNote3, 76;]);
+			~oldTemp = inputTemperature;
+		};
+
+		// Tempen ökar --> C major chord
+		if(diffTemp < -0.1){
+			Synth.new(\tempratureSamplePayer, [\bus, ~outputEffectBus.index, \level, 0.4, \gate, 1;]);
+			~oldTemp = inputTemperature;
+		};
+
 	};
 }, 'temperature');
 
