@@ -6,7 +6,9 @@ s.quit;
 s.scope;
 
 // När servern är igång skickar man över en eller flera synth definitioner till serven.
+
 (
+
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 // Synthdefinitioner som skapar helt procedurella ljud
@@ -14,15 +16,16 @@ SynthDef(\chordSynth, { arg bus, freq, gate = 0, level = 0;
 	var car, mod, envelope, output;
     car = SinOsc.ar(freq, mul: 0.4);
     mod = SinOsc.ar(freq * 2.99, mul: 0.1);
-    car = car * mod;
-    envelope = EnvGen.kr(Env.asr(0.01, 0.5, 0.1), gate);
 
+	car = car * mod;
+	envelope = EnvGen.kr(Env.asr(0.01, 0.5, 0.1), gate);
 	//var oscillator1 = LFTri.ar(freq, mul: 0.1);
 	//var filtered = RLPF.ar(oscillator1, 5000, 0.5);
 	//var envelope = EnvGen.ar(Env.adsr(attackTime: 2, decayTime: 2, sustainLevel: 0.25, releaseTime: 3, peakLevel: 0.5, curve: -4), gate);
-    output = car * envelope * level.lag(1);
+	output =  car * envelope * level.lag(1) * 0.1;
 	Out.ar(bus, {output}!2);
 }).add;
+
 
 SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0;
 	var sound = PlayBuf.ar(
@@ -34,12 +37,13 @@ SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0;
 		loop: 1,
 		doneAction: 2
 	);
-	var output = sound * level;
-	output = output * 0.5;
+	var output = sound * level.lag(0.2);
+	output = output * 0.08;
 	Out.ar(bus, {output}!2);
 }).add;
 
-SynthDef(\drums1Sample, { arg bus, bufnum = 0, gate = 0, level = 0;
+
+SynthDef(\jazzSample, { arg bus, bufnum = 0, gate = 0, level = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
@@ -50,10 +54,26 @@ SynthDef(\drums1Sample, { arg bus, bufnum = 0, gate = 0, level = 0;
 		doneAction: 2
 	);
 	var output = sound * level;
-	output = output * 0.5;
+	output = output * 0.07;
 	Out.ar(bus, {output}!2);
 }).add;
 
+
+SynthDef(\drums1Sample, { arg bus, bufnum = 0, gate = 0, level = 0, volume = 0.09;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: gate,
+		startPos: 0,
+		loop: 1,
+		doneAction: 2
+	);
+	var fadeIn = PfadeIn.new(volume, 0.5);
+	var output = sound * level;
+	output = output * volume;
+	Out.ar(bus, {output}!2);
+}).add;
 
 SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0;
 	var sqrWave = LFPulse.ar(freq: freq / 2, width: 0.5, mul: 0.1);
@@ -65,6 +85,7 @@ SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0;
 
 
 // Synthdefinitioner som spelar upp ljudsamplingar
+
 SynthDef(\doorbellSamplePlayer, { arg bus, bufnum = 0, t_gate = 0, level = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
@@ -78,6 +99,7 @@ SynthDef(\doorbellSamplePlayer, { arg bus, bufnum = 0, t_gate = 0, level = 0;
 	var output = sound * 0.015 * level;
 	Out.ar(bus, {output}!2);
 }).add;
+
 SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
@@ -92,7 +114,6 @@ SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 	output = BHiShelf.ar(output, freq: 1000, rs: 0.5, db: 9);
 	Out.ar(bus, {output}!2);
 }).add;
-
 
 // Effects and output
 SynthDef(\outputEffects, {arg inputbus, bus;
@@ -109,24 +130,26 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 
 	Out.ar(0, output);
 }).add;
-)
 
+)
 // Klientside script
 (
 var drums1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/drumloop.wav");
 var trumbone = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/trombone.wav");
+var jazz = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/jazz1.wav");
 
 // Följande registrerar outputEffect synthdefinitionen på servern
 ~outputChannelBus = Bus.audio(s, numChannels: 2);
 ~outputChannel = Synth.new(\outputChannel, [\inputbus, ~outputChannelBus.index;]).register;
 ~outputEffectBus = Bus.audio(s, numChannels: 2);
 ~outputEffect = Synth.new(\outputEffects, [\inputbus, ~outputEffectBus.index, \bus, ~outputChannelBus.index;]).register;
-~drums1Sample = Synth.new(\drums1Sample, [\buffman , drums1]);
-~trumbonlSample = Synth.new(\trumbonlSample, [\buffman , trumbone]);
+
+~drums1Sample = Synth.new(\drums1Sample, [\bufnum , drums1]);
+~trumbonlSample = Synth.new(\trumbonlSample, [\bufnum , trumbone]);
+~jazzSample = Synth.new(\jazzSample, [\bufnum , jazz]);
 
 
-
-~chordDictionary = Dictionary[0 -> [62, 65, 69, 72], 1 -> [67, 71, 74, 77], 2 -> [60, 64, 67, 71], 3 -> [65, 68, 72, 75]];
+//~chordDictionary = Dictionary[0 -> [62, 65, 69], 1 -> [60, 64, 67], 2 -> [67, 71, 74], 3 -> [65, 68, 72]];
 // Följande ackord ger en lite mollaktig ackordföljd
 // Toner i ackordet 0 = C, Eb, G; 1 = C, D, G; 2 = C, F, G; 3 = D, G, B
 //~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
@@ -155,7 +178,7 @@ for (0, 2) { arg index;
 
 // Följande toner funkar till den lite mer lättsamma ackordföljden
 // Toner i basen C, G, A, F
-~bassNoteNumbersToUse = [60, 55, 57, 53];
+//~bassNoteNumbersToUse = [60, 55, 57, 53];
 
 // Följande toner funkar till den lite mer dystra ackordföljden
 // Toner i basen G, B, C, C (en oktav ner)
@@ -176,7 +199,7 @@ for (0, 2) { arg index;
 ~numberOfPersons = 0;
 // Detta förbereder en rutin som sequencerfunktionen använder senare
 ~startRoutine.play(AppClock);
-~tempoInBPM = 120; // Detta är tempot i slag per minut (beats per minute)
+~tempoInBPM = 75; // Detta är tempot i slag per minut (beats per minute)
 ~beatCounter = 1; // Detta är en variabel som håller koll på vilket slag i takten det är
 ~startFlag = true; // En flagga som används för att starta klockan (en gång) när det första OSC-meddelandet tas emot
 ~stopflag = false; // En flagga som används när dagen är slut och sedan stoppar uppspelningen
@@ -247,27 +270,37 @@ OSCdef(\timeListener, { arg inputmsg;
 		8, { // Morning
 			// Spela upp klockljudet som markerar de olika tidsdelarna
 			~playbell.value;
+
 			~drums1Sample.set(\gate, 1, \level, 1);
-			// Sätt ljudvolymen för de procedurella syntarna, vilken sedan sätts i sequencerfunktionen
-			~chordLevel = 0.25;
+
+
+			//~jazzSample.set(\gate, 1, \level, 1);
+			~chordLevel = 0;
 			~bassLevel = 0;
 		},
 		11, { // Lunch
 			~playbell.value;
+			~tempoInBPM = 100;
 
+			~drums1Sample.set(\volume, 0.05);
 			~trumbonlSample.set(\gate, 1, \level, 1);
+			~jazzSample.set(\gate, 0, \level, 0);
 
-			~chordLevel = 0.5;
+			//~chordLevel = 0.5;
 			~bassLevel = 0.25;
 		},
 		13, { // Afternoon
 			~playbell.value;
+			~jazzSample.set(\gate, 1, \level, 1);
+			~drums1Sample.set(\gate, 0, \level, 0);
 			~trumbonlSample.set(\gate, 0, \level, 0);
-			~chordLevel = 0.25;
+
+			//~chordLevel = 0.25;
 			~bassLevel = 0.5;
 		},
 		17, { // Evening
 			~playbell.value;
+			~jazzSample.set(\gate, 0, \level, 0);
 
 			~chordLevel = 0.5;
 			~bassLevel = 1;
