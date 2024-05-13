@@ -11,12 +11,50 @@ s.scope;
 
 // Synthdefinitioner som skapar helt procedurella ljud
 SynthDef(\chordSynth, { arg bus, freq, gate = 0, level = 0;
-	var oscillator1 = LFTri.ar(freq, mul: 0.1);
-	var filtered = RLPF.ar(oscillator1, 5000, 0.5);
-	var envelope = EnvGen.ar(Env.adsr(attackTime: 2, decayTime: 2, sustainLevel: 0.25, releaseTime: 3, peakLevel: 0.5, curve: -4), gate);
-	var output = filtered * envelope * level.lag(1);
+	var car, mod, envelope, output;
+    car = SinOsc.ar(freq, mul: 0.4);
+    mod = SinOsc.ar(freq * 2.99, mul: 0.1);
+    car = car * mod;
+    envelope = EnvGen.kr(Env.asr(0.01, 0.5, 0.1), gate);
+
+	//var oscillator1 = LFTri.ar(freq, mul: 0.1);
+	//var filtered = RLPF.ar(oscillator1, 5000, 0.5);
+	//var envelope = EnvGen.ar(Env.adsr(attackTime: 2, decayTime: 2, sustainLevel: 0.25, releaseTime: 3, peakLevel: 0.5, curve: -4), gate);
+    output = car * envelope * level.lag(1);
 	Out.ar(bus, {output}!2);
 }).add;
+
+SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: gate,
+		startPos: 0,
+		loop: 1,
+		doneAction: 2
+	);
+	var output = sound * level;
+	output = output * 0.5;
+	Out.ar(bus, {output}!2);
+}).add;
+
+SynthDef(\drums1Sample, { arg bus, bufnum = 0, gate = 0, level = 0;
+	var sound = PlayBuf.ar(
+		numChannels: 2,
+		bufnum: bufnum,
+		rate: BufRateScale.kr(bufnum),
+		trigger: gate,
+		startPos: 0,
+		loop: 1,
+		doneAction: 2
+	);
+	var output = sound * level;
+	output = output * 0.5;
+	Out.ar(bus, {output}!2);
+}).add;
+
+
 SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0;
 	var sqrWave = LFPulse.ar(freq: freq / 2, width: 0.5, mul: 0.1);
 	var filtered = LPF.ar(sqrWave, 500);
@@ -60,9 +98,9 @@ SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 SynthDef(\outputEffects, {arg inputbus, bus;
 	var input = In.ar(inputbus, numChannels: 2);
 	var reverbed = FreeVerb.ar(in: input, mix: 1, room: 0.5, damp: 0.1, mul: 1.0);
-	var echo = Greyhole.ar(in: input, delayTime: 2.5, damp: 0.5, diff: 0.8, feedback: 0.5);
-	var roomEffects = reverbed + echo;
-	var output = input + (roomEffects * 0.75);
+//	var echo = Greyhole.ar(in: input, delayTime: 2.5, damp: 0.5, diff: 0.8, feedback: 0.5);
+//	var roomEffects = reverbed + echo;
+	var output = input + (reverbed * 0.75);
 	Out.ar(bus, output);
 }).add;
 SynthDef(\outputChannel, {arg inputbus, level = 0.5;
@@ -75,15 +113,23 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 
 // Klientside script
 (
+var drums1 = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/drumloop.wav");
+var trumbone = Buffer.read(s, thisProcess.nowExecutingPath.dirname++"/sounds/trombone.wav");
+
 // Följande registrerar outputEffect synthdefinitionen på servern
 ~outputChannelBus = Bus.audio(s, numChannels: 2);
 ~outputChannel = Synth.new(\outputChannel, [\inputbus, ~outputChannelBus.index;]).register;
 ~outputEffectBus = Bus.audio(s, numChannels: 2);
 ~outputEffect = Synth.new(\outputEffects, [\inputbus, ~outputEffectBus.index, \bus, ~outputChannelBus.index;]).register;
+~drums1Sample = Synth.new(\drums1Sample, [\buffman , drums1]);
+~trumbonlSample = Synth.new(\trumbonlSample, [\buffman , trumbone]);
 
+
+
+~chordDictionary = Dictionary[0 -> [62, 65, 69, 72], 1 -> [67, 71, 74, 77], 2 -> [60, 64, 67, 71], 3 -> [65, 68, 72, 75]];
 // Följande ackord ger en lite mollaktig ackordföljd
 // Toner i ackordet 0 = C, Eb, G; 1 = C, D, G; 2 = C, F, G; 3 = D, G, B
-~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
+//~chordDictionary = Dictionary[0 -> [60, 63, 67], 1 -> [60, 62, 67], 2 -> [60, 65, 67], 3 -> [62, 67, 71]];
 
 // Följande ackord ger en lite mer lättsam (?) ackordföljd
 // Toner i ackordet 0 = C, E, G; 1 = D, G, B; 2 = C, E, A; 3 = C, F, A
@@ -99,16 +145,17 @@ SynthDef(\outputChannel, {arg inputbus, level = 0.5;
 // Fyll dictionaryt med syntarna och skicka med effektbussen
 for (0, 2) { arg index;
 	~chordSynthDictionary.add(index -> Synth.new(\chordSynth, [\bus, ~outputEffectBus.index;]).register);
+
 };
 ~chordLevel = 0.25;
 
 // Följande toner funkar till den mollaktiga ackordföljden
 // Toner i basen C, C, F, G
-~bassNoteNumbersToUse = [60, 50, 53, 55];
+//~bassNoteNumbersToUse = [60, 50, 53, 55];
 
 // Följande toner funkar till den lite mer lättsamma ackordföljden
 // Toner i basen C, G, A, F
-//~bassNoteNumbersToUse = [60, 55, 57, 53];
+~bassNoteNumbersToUse = [60, 55, 57, 53];
 
 // Följande toner funkar till den lite mer dystra ackordföljden
 // Toner i basen G, B, C, C (en oktav ner)
@@ -129,7 +176,7 @@ for (0, 2) { arg index;
 ~numberOfPersons = 0;
 // Detta förbereder en rutin som sequencerfunktionen använder senare
 ~startRoutine.play(AppClock);
-~tempoInBPM = 75; // Detta är tempot i slag per minut (beats per minute)
+~tempoInBPM = 120; // Detta är tempot i slag per minut (beats per minute)
 ~beatCounter = 1; // Detta är en variabel som håller koll på vilket slag i takten det är
 ~startFlag = true; // En flagga som används för att starta klockan (en gång) när det första OSC-meddelandet tas emot
 ~stopflag = false; // En flagga som används när dagen är slut och sedan stoppar uppspelningen
@@ -143,6 +190,7 @@ for (0, 2) { arg index;
 		if (~beatCounter == 1) {
 			~chordSynthDictionary.size.do{ arg index;
 				~chordSynthDictionary.at(index).set(\freq, ~chordDictionary[~chordNumber][index].midicps, \level, ~chordLevel, \gate, 1);
+
 			};
 			~bassSynth.set(\freq, ~bassNoteNumbersToUse[~chordNumber].midicps, \level, ~bassLevel, \gate, 1);
 		};
@@ -168,7 +216,7 @@ for (0, 2) { arg index;
 			// Och återställ ~beatCounter till 1
 			~beatCounter = 1;
 		};
-		1.0; // 1.0 innebär att schedAbs klockas i fjärdedelar av en takt
+		0.2; // 1.0 innebär att schedAbs klockas i fjärdedelar av en takt
 	});
 };
 
@@ -199,7 +247,7 @@ OSCdef(\timeListener, { arg inputmsg;
 		8, { // Morning
 			// Spela upp klockljudet som markerar de olika tidsdelarna
 			~playbell.value;
-
+			~drums1Sample.set(\gate, 1, \level, 1);
 			// Sätt ljudvolymen för de procedurella syntarna, vilken sedan sätts i sequencerfunktionen
 			~chordLevel = 0.25;
 			~bassLevel = 0;
@@ -207,12 +255,14 @@ OSCdef(\timeListener, { arg inputmsg;
 		11, { // Lunch
 			~playbell.value;
 
+			~trumbonlSample.set(\gate, 1, \level, 1);
+
 			~chordLevel = 0.5;
 			~bassLevel = 0.25;
 		},
 		13, { // Afternoon
 			~playbell.value;
-
+			~trumbonlSample.set(\gate, 0, \level, 0);
 			~chordLevel = 0.25;
 			~bassLevel = 0.5;
 		},
@@ -252,6 +302,7 @@ OSCdef(\personListener, { arg inputmsg;
 			Synth.new(\doorbellSamplePlayer, [\bufnum, ~doorbellSample, \bus, ~outputEffectBus.index, \level, 1;]);
 		};
 		~numberOfPersons = inputPerson;
+
 	};
 }, 'person');
 
