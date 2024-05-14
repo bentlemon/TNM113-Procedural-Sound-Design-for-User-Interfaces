@@ -19,16 +19,11 @@ SynthDef(\chordSynth, { arg bus, freq, gate = 0, level = 0;
 
 	car = car * mod;
 	envelope = EnvGen.kr(Env.asr(0.01, 0.5, 0.1), gate);
-	//var oscillator1 = LFTri.ar(freq, mul: 0.1);
-	//var filtered = RLPF.ar(oscillator1, 5000, 0.5);
-	//var envelope = EnvGen.ar(Env.adsr(attackTime: 2, decayTime: 2, sustainLevel: 0.25, releaseTime: 3, peakLevel: 0.5, curve: -4), gate);
 	output =  car * envelope * level.lag(1) * 0.1;
 	Out.ar(bus, {output}!2);
 }).add;
 
-<<<<<<< HEAD
-
-SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0;
+SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0, volume = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
@@ -39,12 +34,12 @@ SynthDef(\trumbonlSample, { arg bus, bufnum = 0, gate = 0, level = 0;
 		doneAction: 2
 	);
 	var output = sound * level.lag(0.2);
-	output = output * 0.08;
+	output = output * volume;
 	Out.ar(bus, {output}!2);
 }).add;
 
 
-SynthDef(\jazzSample, { arg bus, bufnum = 0, gate = 0, level = 0;
+SynthDef(\jazzSample, { arg bus, bufnum = 0, gate = 0, level = 0, volume = 0;
 	var sound = PlayBuf.ar(
 		numChannels: 2,
 		bufnum: bufnum,
@@ -76,13 +71,11 @@ SynthDef(\drums1Sample, { arg bus, bufnum = 0, gate = 0, level = 0, volume = 0.0
 	Out.ar(bus, {output}!2);
 }).add;
 
-=======
->>>>>>> molly_lab6
-SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0;
+SynthDef(\bassSynth, { arg bus, freq, gate = 0, level = 0, volume = 0;
 	var sqrWave = LFPulse.ar(freq: freq / 2, width: 0.5, mul: 0.1);
 	var filtered = LPF.ar(sqrWave, 500);
 	var envelope = EnvGen.ar(Env.adsr(attackTime: 2, decayTime: 2, sustainLevel: 0.5, releaseTime: 3, peakLevel: 0.5 * level, curve: -6), gate);
-	var output = filtered * envelope;
+	var output = filtered * envelope * volume;
 	Out.ar(bus, {output}!2);
 }).add;
 
@@ -118,8 +111,6 @@ SynthDef(\bellSamplePlayer, { arg bus, bufnum = 0, level = 0;
 	Out.ar(bus, {output}!2);
 }).add;
 
-<<<<<<< HEAD
-=======
 SynthDef(\tempratureSamplePayer, { arg bus, gate = 0, level = 0, midiNote1 = 60, midiNote2 = 64, midiNote3 = 67;
 	var sin = SinOsc.ar(midiNote1.midicps);
 	var sin2 = SinOsc.ar(midiNote2.midicps);
@@ -160,16 +151,14 @@ SynthDef(\houseSamplerPlayer, {arg bufnum = 0, level = 1.0;
 	Out.ar(0, sound);
 }).add;
 
->>>>>>> molly_lab6
 // Effects and output
 SynthDef(\outputEffects, {arg inputbus, bus;
 	var input = In.ar(inputbus, numChannels: 2);
 	var reverbed = FreeVerb.ar(in: input, mix: 1, room: 0.5, damp: 0.1, mul: 1.0);
-<<<<<<< HEAD
+
 //	var echo = Greyhole.ar(in: input, delayTime: 2.5, damp: 0.5, diff: 0.8, feedback: 0.5);
 //	var roomEffects = reverbed + echo;
-=======
->>>>>>> molly_lab6
+
 	var output = input + (reverbed * 0.75);
 	Out.ar(bus, output);
 }).add;
@@ -312,66 +301,79 @@ OSCdef(\timeListener, { arg inputmsg;
 		};
 	};
 }, 'time');
-
+s.record(duration: 5);
 
 // Följande funktion anropas av OSC-lyssnaren som tar emot tidsinformationen
 ~hourSyncedStuff = {
 	switch (~hour,
 		8, { // Morning
 			// Spela upp klockljudet som markerar de olika tidsdelarna
-			~playbell.value;
-
-<<<<<<< HEAD
+			//~playbell.value;
 			~drums1Sample.set(\gate, 1, \level, 1);
-
-
-			//~jazzSample.set(\gate, 1, \level, 1);
 			~chordLevel = 0;
-=======
+
 			// Sätt ljudvolymen för de procedurella syntarna, vilken sedan sätts i sequencerfunktionen
 			~chordLevel = 0.0;
->>>>>>> molly_lab6
-			~bassLevel = 0;
 		},
 		11, { // Lunch
 			~playbell.value;
 			~tempoInBPM = 100;
 
-<<<<<<< HEAD
 			~drums1Sample.set(\volume, 0.05);
-			~trumbonlSample.set(\gate, 1, \level, 1);
+			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.05 );
+
+			~bassLevel = 0.25;
+			~chordLevel = 0.0;
+		},
+		12, { // Lunch
+			~playbell.value;
+			~tempoInBPM = 100;
+
+			~drums1Sample.set(\volume, 0.008);
+			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.01);
 			~jazzSample.set(\gate, 0, \level, 0);
 
-			//~chordLevel = 0.5;
+
 			~bassLevel = 0.25;
-=======
 			~chordLevel = 0.0;
-			~bassLevel = 0.0;
->>>>>>> molly_lab6
 		},
 		13, { // Afternoon
 			~playbell.value;
-			~jazzSample.set(\gate, 1, \level, 1);
+			~jazzSample.set(\gate, 1, \level, 1, \volume, 0.3);
 			~drums1Sample.set(\gate, 0, \level, 0);
 			~trumbonlSample.set(\gate, 0, \level, 0);
 
-<<<<<<< HEAD
-			//~chordLevel = 0.25;
+			~chordLevel = 1;
 			~bassLevel = 0.5;
-=======
-			~chordLevel = 0.0;
-			~bassLevel = 0.0;
->>>>>>> molly_lab6
+
+		},
+		14, { // Afternoon
+			~playbell.value;
+			~jazzSample.set(\gate, 1, \level, 1, \volume, 1);
+			~drums1Sample.set(\gate, 0, \level, 0);
+			~trumbonlSample.set(\gate, 0, \level, 0);
+			~bassLevel = 0.5;
+
+		},
+		16, { // Afternoon
+			~playbell.value;
+			~jazzSample.set(\gate, 1, \level, 1, \volume, 2);
+			~drums1Sample.set(\gate, 0, \level, 0);
+			~trumbonlSample.set(\gate, 0, \level, 0);
+			~bassLevel = 0.5;
+
 		},
 		17, { // Evening
 			~playbell.value;
-			~jazzSample.set(\gate, 0, \level, 0);
-
-			~chordLevel = 0.0;
-			~bassLevel = 0;
+			~jazzSample.set(\gate, 1, \level, 2);
+			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.05);
+			~chordLevel = 0.25;
+			~bassLevel = 0.15;
 		},
 		20, { // Happy hour --> Champange
 			~playbell.value;
+			~jazzSample.set(\gate, 0, \level, 0);
+			~trumbonlSample.set(\gate, 0, \level, 0, \volume, 0);
 			Synth.new(\champSamplerPlayer, [\bufnum, ~champSample, \bus, ~outputEffectBus.index, \level, 1.2, \trigger, 1;]);
 		},
 		23, { // Closed
@@ -395,7 +397,7 @@ OSCdef(\personListener, { arg inputmsg;
 	if (inputmsg.size > 1) {
 		var inputPerson = inputmsg[1].asInteger;
 		if (inputPerson > ~numberOfPersons) {
-			Synth.new(\doorbellSamplePlayer, [\bufnum, ~doorbellSample, \bus, ~outputEffectBus.index, \level, 0;]);
+			Synth.new(\doorbellSamplePlayer, [\bufnum, ~doorbellSample, \bus, ~outputEffectBus.index, \level, 1;]);
 		};
 		~numberOfPersons = inputPerson;
 
