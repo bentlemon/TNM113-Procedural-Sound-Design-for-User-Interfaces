@@ -12,7 +12,7 @@ s.scope;
 // Kod inom parenteser körs med <cmd> och <Enter> på Mac eller <ctrl> och <Enter> i Windows
 
 // Synthdefinitioner som skapar helt procedurella ljud
-SynthDef(\chordSynth, { arg bus, freq, gate = 0, level = 0;
+SynthDef(\chordSynth, { arg bus, freq, gate = 1, level = 1;
 	var car, mod, envelope, output;
     car = SinOsc.ar(freq, mul: 0.4);
     mod = SinOsc.ar(freq * 2.99, mul: 0.1);
@@ -242,7 +242,7 @@ for (0, 2) { arg index;
 		// Om ~beatCounter är på första slaget, 1, sätt rätt toner till syntarna
 		if (~beatCounter == 1) {
 			~chordSynthDictionary.size.do{ arg index;
-				~chordSynthDictionary.at(index).set(\freq, ~chordDictionary[~chordNumber][index].midicps, \level, ~chordLevel, \gate, 1);
+				~chordSynthDictionary.at(index).set(\freq, ~chordDictionary[~chordNumber][index].midicps, \level, 1, ~chordLevel, \gate, 1);
 
 			};
 			~bassSynth.set(\freq, ~bassNoteNumbersToUse[~chordNumber].midicps, \level, ~bassLevel, \gate, 1);
@@ -253,7 +253,7 @@ for (0, 2) { arg index;
 		// Släpp upp "tangenterna" för syntarna
 		if (~beatCounter == 9) {
 			~chordSynthDictionary.size.do{ arg index;
-				~chordSynthDictionary.at(index).set(\gate, 0);
+				~chordSynthDictionary.at(index).set(\gate, 1);
 			};
 			~bassSynth.set(\gate, 0);
 			// Kolla om ~stopFlag och första ackordet gäller, stoppa då uppspelningen
@@ -301,14 +301,13 @@ OSCdef(\timeListener, { arg inputmsg;
 		};
 	};
 }, 'time');
-s.record(duration: 5);
 
 // Följande funktion anropas av OSC-lyssnaren som tar emot tidsinformationen
 ~hourSyncedStuff = {
 	switch (~hour,
 		8, { // Morning
 			// Spela upp klockljudet som markerar de olika tidsdelarna
-			//~playbell.value;
+			~playbell.value;
 			~drums1Sample.set(\gate, 1, \level, 1);
 			~chordLevel = 0;
 
@@ -323,19 +322,19 @@ s.record(duration: 5);
 			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.05 );
 
 			~bassLevel = 0.25;
-			~chordLevel = 0.0;
+			~chordLevel = 0.25;
 		},
 		12, { // Lunch
 			~playbell.value;
 			~tempoInBPM = 100;
 
-			~drums1Sample.set(\volume, 0.008);
-			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.01);
+			~drums1Sample.set(\volume, 0.03);
+			~trumbonlSample.set(\gate, 1, \level, 1, \volume, 0.03);
 			~jazzSample.set(\gate, 0, \level, 0);
 
 
 			~bassLevel = 0.25;
-			~chordLevel = 0.0;
+			~chordLevel = 0.25;
 		},
 		13, { // Afternoon
 			~playbell.value;
